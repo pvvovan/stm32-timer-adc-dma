@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<!-- saved from url=(0072)https://skybluetrades.net/blog/2020/11/2020-11-26-stm32-timer-adc-dma-3/ -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <title>sky blue trades  | STM32 Timer + ADC + DMA: Part 3</title>
+  <link rel="stylesheet" href="./sky blue trades _ STM32 Timer + ADC + DMA_ Part 3_files/style.css">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="./sky blue trades _ STM32 Timer + ADC + DMA_ Part 3_files/polyfill.min.js"></script>
+
+
+<style type="text/css">.CtxtMenu_InfoClose {  top:.2em; right:.2em;}
+.CtxtMenu_InfoContent {  overflow:auto; text-align:left; font-size:80%;  padding:.4em .6em; border:1px inset; margin:1em 0px;  max-height:20em; max-width:30em; background-color:#EEEEEE;  white-space:normal;}
+.CtxtMenu_Info.CtxtMenu_MousePost {outline:none;}
+.CtxtMenu_Info {  position:fixed; left:50%; width:auto; text-align:center;  border:3px outset; padding:1em 2em; background-color:#DDDDDD;  color:black;  cursor:default; font-family:message-box; font-size:120%;  font-style:normal; text-indent:0; text-transform:none;  line-height:normal; letter-spacing:normal; word-spacing:normal;  word-wrap:normal; white-space:nowrap; float:none; z-index:201;  border-radius: 15px;                     /* Opera 10.5 and IE9 */  -webkit-border-radius:15px;               /* Safari and Chrome */  -moz-border-radius:15px;                  /* Firefox */  -khtml-border-radius:15px;                /* Konqueror */  box-shadow:0px 10px 20px #808080;         /* Opera 10.5 and IE9 */  -webkit-box-shadow:0px 10px 20px #808080; /* Safari 3 & Chrome */  -moz-box-shadow:0px 10px 20px #808080;    /* Forefox 3.5 */  -khtml-box-shadow:0px 10px 20px #808080;  /* Konqueror */  filter:progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color="gray", Positive="true"); /* IE */}
+</style><style type="text/css">.CtxtMenu_MenuClose {  position:absolute;  cursor:pointer;  display:inline-block;  border:2px solid #AAA;  border-radius:18px;  -webkit-border-radius: 18px;             /* Safari and Chrome */  -moz-border-radius: 18px;                /* Firefox */  -khtml-border-radius: 18px;              /* Konqueror */  font-family: "Courier New", Courier;  font-size:24px;  color:#F0F0F0}
+.CtxtMenu_MenuClose span {  display:block; background-color:#AAA; border:1.5px solid;  border-radius:18px;  -webkit-border-radius: 18px;             /* Safari and Chrome */  -moz-border-radius: 18px;                /* Firefox */  -khtml-border-radius: 18px;              /* Konqueror */  line-height:0;  padding:8px 0 6px     /* may need to be browser-specific */}
+.CtxtMenu_MenuClose:hover {  color:white!important;  border:2px solid #CCC!important}
+.CtxtMenu_MenuClose:hover span {  background-color:#CCC!important}
+.CtxtMenu_MenuClose:hover:focus {  outline:none}
+</style><style type="text/css">.CtxtMenu_Menu {  position:absolute;  background-color:white;  color:black;  width:auto; padding:5px 0px;  border:1px solid #CCCCCC; margin:0; cursor:default;  font: menu; text-align:left; text-indent:0; text-transform:none;  line-height:normal; letter-spacing:normal; word-spacing:normal;  word-wrap:normal; white-space:nowrap; float:none; z-index:201;  border-radius: 5px;                     /* Opera 10.5 and IE9 */  -webkit-border-radius: 5px;             /* Safari and Chrome */  -moz-border-radius: 5px;                /* Firefox */  -khtml-border-radius: 5px;              /* Konqueror */  box-shadow:0px 10px 20px #808080;         /* Opera 10.5 and IE9 */  -webkit-box-shadow:0px 10px 20px #808080; /* Safari 3 & Chrome */  -moz-box-shadow:0px 10px 20px #808080;    /* Forefox 3.5 */  -khtml-box-shadow:0px 10px 20px #808080;  /* Konqueror */}
+.CtxtMenu_MenuItem {  padding: 1px 2em;  background:transparent;}
+.CtxtMenu_MenuArrow {  position:absolute; right:.5em; padding-top:.25em; color:#666666;  font-family: null; font-size: .75em}
+.CtxtMenu_MenuActive .CtxtMenu_MenuArrow {color:white}
+.CtxtMenu_MenuArrow.CtxtMenu_RTL {left:.5em; right:auto}
+.CtxtMenu_MenuCheck {  position:absolute; left:.7em;  font-family: null}
+.CtxtMenu_MenuCheck.CtxtMenu_RTL { right:.7em; left:auto }
+.CtxtMenu_MenuRadioCheck {  position:absolute; left: .7em;}
+.CtxtMenu_MenuRadioCheck.CtxtMenu_RTL {  right: .7em; left:auto}
+.CtxtMenu_MenuInputBox {  padding-left: 1em; right:.5em; color:#666666;  font-family: null;}
+.CtxtMenu_MenuInputBox.CtxtMenu_RTL {  left: .1em;}
+.CtxtMenu_MenuComboBox {  left:.1em; padding-bottom:.5em;}
+.CtxtMenu_MenuSlider {  left: .1em;}
+.CtxtMenu_SliderValue {  position:absolute; right:.1em; padding-top:.25em; color:#333333;  font-size: .75em}
+.CtxtMenu_SliderBar {  outline: none; background: #d3d3d3}
+.CtxtMenu_MenuLabel {  padding: 1px 2em 3px 1.33em;  font-style:italic}
+.CtxtMenu_MenuRule {  border-top: 1px solid #DDDDDD;  margin: 4px 3px;}
+.CtxtMenu_MenuDisabled {  color:GrayText}
+.CtxtMenu_MenuActive {  background-color: #606872;  color: white;}
+.CtxtMenu_MenuDisabled:focus {  background-color: #E8E8E8}
+.CtxtMenu_MenuLabel:focus {  background-color: #E8E8E8}
+.CtxtMenu_ContextMenu:focus {  outline:none}
+.CtxtMenu_ContextMenu .CtxtMenu_MenuItem:focus {  outline:none}
+.CtxtMenu_SelectionMenu {  position:relative; float:left;  border-bottom: none; -webkit-box-shadow:none; -webkit-border-radius:0px; }
+.CtxtMenu_SelectionItem {  padding-right: 1em;}
+.CtxtMenu_Selection {  right: 40%; width:50%; }
+.CtxtMenu_SelectionBox {  padding: 0em; max-height:20em; max-width: none;  background-color:#FFFFFF;}
+.CtxtMenu_SelectionDivider {  clear: both; border-top: 2px solid #000000;}
+.CtxtMenu_Menu .CtxtMenu_MenuClose {  top:-10px; left:-10px}
+</style><style id="MJX-CHTML-styles">
+mjx-container[jax="CHTML"] {
+  line-height: 0;
+}
+
+mjx-container [space="1"] {
+  margin-left: .111em;
+}
+
+mjx-container [space="2"] {
+  margin-left: .167em;
+}
+
+mjx-container [space="3"] {
+  margin-left: .222em;
+}
+
+mjx-container [space="4"] {
+  margin-left: .278em;
+}
+
+mjx-container [space="5"] {
+  margin-left: .333em;
+}
+
+mjx-container [rspace="1"] {
+  margin-right: .111em;
+}
+
+mjx-container [rspace="2"] {
+  margin-right: .167em;
+}
+
+mjx-container [rspace="3"] {
+  margin-right: .222em;
+}
+
+mjx-container [rspace="4"] {
+  margin-right: .278em;
+}
+
+mjx-container [rspace="5"] {
+  margin-right: .333em;
+}
+
+mjx-container [size="s"] {
+  font-size: 70.7%;
+}
+
+mjx-container [size="ss"] {
+  font-size: 50%;
+}
+
+mjx-container [size="Tn"] {
+  font-size: 60%;
+}
+
+mjx-container [size="sm"] {
+  font-size: 85%;
+}
+
+mjx-container [size="lg"] {
+  font-size: 120%;
+}
+
+mjx-container [size="Lg"] {
+  font-size: 144%;
+}
+
+mjx-container [size="LG"] {
+  font-size: 173%;
+}
+
+mjx-container [size="hg"] {
+  font-size: 207%;
+}
+
+mjx-container [size="HG"] {
+  font-size: 249%;
+}
+
+mjx-container [width="full"] {
+  width: 100%;
+}
+
+mjx-box {
+  display: inline-block;
+}
+
+mjx-block {
+  display: block;
+}
+
+mjx-itable {
+  display: inline-table;
+}
+
+mjx-row {
+  display: table-row;
+}
+
+mjx-row > * {
+  display: table-cell;
+}
+
+mjx-mtext {
+  display: inline-block;
+}
+
+mjx-mstyle {
+  display: inline-block;
+}
+
+mjx-merror {
+  display: inline-block;
+  color: red;
+  background-color: yellow;
+}
+
+mjx-mphantom {
+  visibility: hidden;
+}
+
+_::-webkit-full-page-media, _:future, :root mjx-container {
+  will-change: opacity;
+}
+
+mjx-assistive-mml {
+  position: absolute !important;
+  top: 0px;
+  left: 0px;
+  clip: rect(1px, 1px, 1px, 1px);
+  padding: 1px 0px 0px 0px !important;
+  border: 0px !important;
+  display: block !important;
+  width: auto !important;
+  overflow: hidden !important;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+mjx-assistive-mml[display="block"] {
+  width: 100% !important;
+}
+
+mjx-c::before {
+  display: block;
+  width: 0;
+}
+
+.MJX-TEX {
+  font-family: MJXZERO, MJXTEX;
+}
+
+.TEX-B {
+  font-family: MJXZERO, MJXTEX-B;
+}
+
+.TEX-I {
+  font-family: MJXZERO, MJXTEX-I;
+}
+
+.TEX-MI {
+  font-family: MJXZERO, MJXTEX-MI;
+}
+
+.TEX-BI {
+  font-family: MJXZERO, MJXTEX-BI;
+}
+
+.TEX-S1 {
+  font-family: MJXZERO, MJXTEX-S1;
+}
+
+.TEX-S2 {
+  font-family: MJXZERO, MJXTEX-S2;
+}
+
+.TEX-S3 {
+  font-family: MJXZERO, MJXTEX-S3;
+}
+
+.TEX-S4 {
+  font-family: MJXZERO, MJXTEX-S4;
+}
+
+.TEX-A {
+  font-family: MJXZERO, MJXTEX-A;
+}
+
+.TEX-C {
+  font-family: MJXZERO, MJXTEX-C;
+}
+
+.TEX-CB {
+  font-family: MJXZERO, MJXTEX-CB;
+}
+
+.TEX-FR {
+  font-family: MJXZERO, MJXTEX-FR;
+}
+
+.TEX-FRB {
+  font-family: MJXZERO, MJXTEX-FRB;
+}
+
+.TEX-SS {
+  font-family: MJXZERO, MJXTEX-SS;
+}
+
+.TEX-SSB {
+  font-family: MJXZERO, MJXTEX-SSB;
+}
+
+.TEX-SSI {
+  font-family: MJXZERO, MJXTEX-SSI;
+}
+
+.TEX-SC {
+  font-family: MJXZERO, MJXTEX-SC;
+}
+
+.TEX-T {
+  font-family: MJXZERO, MJXTEX-T;
+}
+
+.TEX-V {
+  font-family: MJXZERO, MJXTEX-V;
+}
+
+.TEX-VB {
+  font-family: MJXZERO, MJXTEX-VB;
+}
+
+mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
+  font-family: MJXZERO, MJXTEX-S1, MJXTEX-S4, MJXTEX, MJXTEX-A ! important;
+}
+
+@font-face /* 0 */ {
+  font-family: MJXZERO;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Zero.woff") format("woff");
+}
+
+@font-face /* 1 */ {
+  font-family: MJXTEX;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Main-Regular.woff") format("woff");
+}
+
+@font-face /* 2 */ {
+  font-family: MJXTEX-B;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Main-Bold.woff") format("woff");
+}
+
+@font-face /* 3 */ {
+  font-family: MJXTEX-I;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Math-Italic.woff") format("woff");
+}
+
+@font-face /* 4 */ {
+  font-family: MJXTEX-MI;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Main-Italic.woff") format("woff");
+}
+
+@font-face /* 5 */ {
+  font-family: MJXTEX-BI;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Math-BoldItalic.woff") format("woff");
+}
+
+@font-face /* 6 */ {
+  font-family: MJXTEX-S1;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Size1-Regular.woff") format("woff");
+}
+
+@font-face /* 7 */ {
+  font-family: MJXTEX-S2;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Size2-Regular.woff") format("woff");
+}
+
+@font-face /* 8 */ {
+  font-family: MJXTEX-S3;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Size3-Regular.woff") format("woff");
+}
+
+@font-face /* 9 */ {
+  font-family: MJXTEX-S4;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Size4-Regular.woff") format("woff");
+}
+
+@font-face /* 10 */ {
+  font-family: MJXTEX-A;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_AMS-Regular.woff") format("woff");
+}
+
+@font-face /* 11 */ {
+  font-family: MJXTEX-C;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Calligraphic-Regular.woff") format("woff");
+}
+
+@font-face /* 12 */ {
+  font-family: MJXTEX-CB;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Calligraphic-Bold.woff") format("woff");
+}
+
+@font-face /* 13 */ {
+  font-family: MJXTEX-FR;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Fraktur-Regular.woff") format("woff");
+}
+
+@font-face /* 14 */ {
+  font-family: MJXTEX-FRB;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Fraktur-Bold.woff") format("woff");
+}
+
+@font-face /* 15 */ {
+  font-family: MJXTEX-SS;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_SansSerif-Regular.woff") format("woff");
+}
+
+@font-face /* 16 */ {
+  font-family: MJXTEX-SSB;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_SansSerif-Bold.woff") format("woff");
+}
+
+@font-face /* 17 */ {
+  font-family: MJXTEX-SSI;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_SansSerif-Italic.woff") format("woff");
+}
+
+@font-face /* 18 */ {
+  font-family: MJXTEX-SC;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Script-Regular.woff") format("woff");
+}
+
+@font-face /* 19 */ {
+  font-family: MJXTEX-T;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Typewriter-Regular.woff") format("woff");
+}
+
+@font-face /* 20 */ {
+  font-family: MJXTEX-V;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Vector-Regular.woff") format("woff");
+}
+
+@font-face /* 21 */ {
+  font-family: MJXTEX-VB;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Vector-Bold.woff") format("woff");
+}
+</style></head>
+<body>
+  <header class="site-header" id="site-header">
+    <nav>
+      <div class="header-section">
+        <div class="logo"><a href="https://skybluetrades.net/">sky blue trades</a></div>
+        <label id="menu-label" for="menu-toggle">
+          <svg viewBox="0 0 100 80" width="40" height="40">
+            <rect y="10" width="100" height="15"></rect>
+            <rect y="40" width="100" height="15"></rect>
+            <rect y="70" width="100" height="15"></rect>
+          </svg>
+        </label>
+        <input type="checkbox" id="menu-toggle">
+        <ul class="menu-items">
+          <li><a href="https://skybluetrades.net/projects/">Projects</a></li>
+          <li><a href="https://skybluetrades.net/tutorials">Tutorials</a></li>
+          <li><a href="https://skybluetrades.net/blog">Blog</a></li>
+          <li><a href="https://skybluetrades.net/hire-me.html">Hire me!</a></li>
+          <li class="top-header"><a href="https://skybluetrades.net/search.html"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg> Search</a></li>
+          <li class="top-header"><a href="https://skybluetrades.net/feed.xml"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg> RSS feed</a></li>
+      </ul></div>
+        
+      
+      <div class="right-header">
+        <a href="https://skybluetrades.net/search.html"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></a>
+        <a href="https://skybluetrades.net/feed.xml"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a>
+      </div>
+    </nav>
+  </header>
+  <article class="maincontent">
+
+    <h1>STM32 Timer + ADC + DMA: Part 3</h1>
+    <div class="title-info"><span class="title-date">26 Nov 2020</span><span class="category"><a href="https://skybluetrades.net/blog/category/embedded.html">embedded</a></span><span class="category"><a href="https://skybluetrades.net/blog/category/stm32.html">stm32</a></span></div>
+    <section>
+      <p>In this final article of three, we’re going to make our DMA-based ADC example from the <a href="https://skybluetrades.net/blog/2020/11/2020-11-25-stm32-timer-adc-dma-2">second article</a> run off a timer, and we’ll do a small demonstration of how this might be used in a realistic application.</p><p>There’s a <a href="https://youtu.be/GisdV5D7A8o">video demonstrating each of the examples</a> covered in this series of articles. It’s probably most useful to watch it in conjunction with reading the articles.</p><h2>Timers on the STM32F767</h2><p>The STM32F767 has a lot of timers. They come in five different varieties:</p><ul><li><p>“Advanced-control” timers (TIM1, TIM8);</p></li><li><p>32-bit general-purpose timers with 4 channels (TIM2, TIM5);</p></li><li><p>16-bit general-purpose timers with 4 channels (TIM3, TIM4);</p></li><li><p>16-bit up-counter timers with 2 channels (TIM9, TIM12);</p></li><li><p>16-bit up-counter timers with 1 channel (TIM10, TIM11, TIM13, TIM14);</p></li><li><p>16-bit basic timers (TIM6, TIM7).</p></li></ul><p>The different timer types have different features (different PWM modes, for instance). For our purposes, the most important feature is the ability to trigger other peripherals, in particular, the ADC. The timer outputs that can be used to trigger ADC conversion are listed in the <code>EXTSEL</code> external event select field of the ADC’s <code>CR2</code> configuration register:</p><p><a href="./sky blue trades _ STM32 Timer + ADC + DMA_ Part 3_files/rm-adc-triggers.png" target="_blank"><img alt="ADC trigger sources" src="./sky blue trades _ STM32 Timer + ADC + DMA_ Part 3_files/rm-adc-triggers.png"></a></p><p>Here, "<code>TRGO</code>" means the trigger output from the timers, which can be set up to be activated on a number of different timer-related events. In conjunction with the possible settings in the <code>EXTEN</code> field of <code>CR2</code>, this allows us to cause ADC conversions to be triggered on different edge transitions for any of these trigger inputs:</p><p><a href="./sky blue trades _ STM32 Timer + ADC + DMA_ Part 3_files/rm-adc-triggers-2.png" target="_blank"><img alt="ADC trigger flags" src="./sky blue trades _ STM32 Timer + ADC + DMA_ Part 3_files/rm-adc-triggers-2.png"></a></p><p>We’re going to use timer <code>TIM2</code> for our examples. This is a 32-bit general-purpose timer that supports various counter modes, as well as having features for PWM waveform generation and timer capture. We’re going to use the timer in its simple up-counter mode, generating a trigger pulse on the <code>TRGO</code> trigger output when timer counter overflows and reloads. This will generate a regular trigger pulse that we can connect to the ADC trigger input.</p><p>(The STM32 microcontrollers tend to use ad hoc mechanisms for inter-peripheral connections like this. In this case, we have a specialised set of configuration assignments we can do for the ADC peripheral to make it trigger on a signal from a selected timer. Some other ARM microcontrollers have a more systematic way of dealing with these kinds of peripheral interconnections. For example, the Nordic Semiconductor nRF52840 has a whole <em>events</em> and <em>tasks</em> infrastructure for each peripheral, along with a dedicated <em>programmable peripheral interconnect</em> system to wire events in one peripheral to tasks in another peripheral. You can wire up a timer event to the “sample” task of the ADC to do regular sampling. But using this setup, you could also do a whole range of completely different things.)</p><h2>Example 4: timer-triggered ADC conversions</h2><p>In <a href="https://github.com/ian-ross/stm32-timer-adc-dma/blob/main/ex4.c">example <code>ex4.c</code></a>, we’re going to sample data from the ADC at 1 Hz, collecting 4 channels of ADC data into a buffer using DMA.</p><h3>DMA configuration</h3><p>DMA configuration is completely identical to the previous example. We use the same DMA modes, we’re moving 4 half-word data items from a peripheral to memory, and so on. And we use the DMA transfer complete interrupt to detect when the ADC conversions are complete.</p><h3>ADC configuration</h3><p>The ADC configuration for this example differs from the previous example in only one way, and that’s the way that ADC conversions are started. Everything else is the same: the number and order of channels to be converted, channel sample times, and so on.</p><p>For the previous example, we set the <code>EXTEN</code> field of ADC register <code>CR2</code> to zero, which disabled external triggers for the ADC. That meant that we started ADC conversions manually by setting the <code>SWSTART</code> bit in the <code>CR2</code> register. This time, we set the <code>EXTEN</code> and <code>EXTSEL</code> fields of the <code>CR2</code> register to start ADC conversions on the rising edge of timer <code>TIM2</code>‘s TRGO trigger output:</p><div class="highlight"><div class="source"><pre><span></span><span class="n">MODIFY_REG</span><span class="p">(</span><span class="n">ADC1</span><span class="o">-&gt;</span><span class="n">CR2</span><span class="p">,</span> <span class="n">ADC_CR2_EXTSEL</span><span class="p">,</span> <span class="mh">0x0B</span> <span class="o">&lt;&lt;</span> <span class="n">ADC_CR2_EXTSEL_Pos</span><span class="p">);</span>
+<span class="n">MODIFY_REG</span><span class="p">(</span><span class="n">ADC1</span><span class="o">-&gt;</span><span class="n">CR2</span><span class="p">,</span> <span class="n">ADC_CR2_EXTEN</span><span class="p">,</span> <span class="mh">0x01</span> <span class="o">&lt;&lt;</span> <span class="n">ADC_CR2_EXTEN_Pos</span><span class="p">);</span>
+</pre></div></div><p>Here, the <code>0x0B</code> value for <code>EXTSEL</code> selects <code>TIM2</code> TRGO as an external event, and the <code>0x01</code> value for <code>EXTEN</code> triggers ADC conversion on the rising edge of the trigger input.</p><h3>Timer configuration</h3><p>Configuring timer <code>TIM2</code> to generate a trigger output pulse once every second requires a few steps. All timers run off a clock, and essentially just count clock pulses. So the first thing we need to know is how fast those clock pulses occur for the timer we’re using.</p><p>In its up-count mode, the <code>TIM2</code> timer we’re going to use can be thought of as a simple counter clocked off the timer’s input clock divided by a prescaler value. We can set the prescaler (so controlling how fast the counter counts up) and the reload value (controlling how often the counter overflows and a trigger event occurs).</p><p><strong>1. Determine timer input clock frequency</strong></p><p>Timer <code>TIM2</code> is on the APB1 peripheral clock, so the clock input can be determined by looking at the APB1 prescaler value in the <code>PPRE1</code> field of the <code>RCC-&gt;CFGR</code> register:</p><div class="highlight"><div class="source"><pre><span></span><span class="kt">uint32_t</span> <span class="n">apb1_prescaler</span> <span class="o">=</span> <span class="n">READ_BIT</span><span class="p">(</span><span class="n">RCC</span><span class="o">-&gt;</span><span class="n">CFGR</span><span class="p">,</span> <span class="n">RCC_CFGR_PPRE1</span><span class="p">);</span>
+<span class="kt">uint32_t</span> <span class="n">timer_clock_frequency</span> <span class="o">=</span>
+  <span class="n">SystemCoreClock</span> <span class="o">&gt;&gt;</span> <span class="n">APBPrescTable</span><span class="p">[</span><span class="n">apb1_prescaler</span> <span class="o">&gt;&gt;</span>  <span class="n">RCC_CFGR_PPRE1_Pos</span><span class="p">];</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">apb1_prescaler</span> <span class="o">!=</span> <span class="n">RCC_CFGR_PPRE1_DIV1</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">timer_clock_frequency</span> <span class="o">*=</span> <span class="mi">2</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div></div><p>Here, <code>SystemCoreClock</code> is the main system clock frequency maintained by the CMSIS board-support code, and <code>APBPrescTable</code> is a table of APB prescaler factors that the <code>PPRE1</code> field in <code>RCC-&gt;CFGR</code> encodes. (There is a small wrinkle here, in that the timer input clock frequency has an extra factor of 2 if the prescaler factor is not unity. This is shown in the main clock tree for the processor in Figure 13 in the reference manual.)</p><p>For our case, with <code>SystemCoreClock</code> running at the maximum 216 MHz rate, the timer input clock frequency is 27 MHz (the APB1 prescaler is set to <a href="https://github.com/ian-ross/stm32-timer-adc-dma/blob/main/common.c#L90">divide the system clock by 8 in the common setup code</a>).</p><p><strong>2. Determine time base prescaler and reload value</strong></p><p>The timer prescaler register <code>TIM2-&gt;PSC</code> determines the relationship between the timer input clock (27 MHz) and the update rate of the timer’s counter.</p><p><a href="./sky blue trades _ STM32 Timer + ADC + DMA_ Part 3_files/rm-timer-prescaler.png" target="_blank"><img alt="Timer prescaler register" src="./sky blue trades _ STM32 Timer + ADC + DMA_ Part 3_files/rm-timer-prescaler.png"></a></p><p>Even though <code>TIM2</code> is a 32-bit timer, the prescaler is 16 bits wide. This means we can have update frequencies ranging over:</p><ul><li><p><code>PSC = 0</code> giving <code>CK_CNT</code> = 27 MHz / 1 = 27 MHz;</p></li><li><p><code>PSC = 0xFFFF</code> giving <code>CK_CNT</code> = 27 MHz / 65536 = 411.987 Hz.</p></li></ul><p>All other things being equal, it can be a good idea to choose the smallest possible prescaler value that you can. This gives a timer counter that updates as fast as possible, giving the finest possible time resolution to the timer. Whether or not this is actually the best thing to do depends on exactly which timer you’re using.</p><p>In our case we’re using a 32-bit timer. That means that if we use a prescaler of one, then the timer counter updates at 27 MHz, and the longest interval that we can time is 2<sup>32</sup> / 27,000,000 = 159 seconds. That’s probably enough for most applications. However, if you were using a 16-bit timer, the longest interval would only be 2<sup>16</sup> / 27,000,000 = 2.4 ms, which is less useful! If you’re using a 16-bit counter, you’d almost certainly want to use a larger prescaler value to slow down the clock driving the timer’s counter, allowing you to measure longer intervals.</p><p>Let’s choose a prescaler value to make calculations simple, by having the timer counter update at 1 MHz. This is 1/27 of the timer input clock frequency, so we need to set:</p><div class="highlight"><div class="source"><pre><span></span><span class="kt">uint32_t</span> <span class="n">timer_prescaler</span> <span class="o">=</span> <span class="mi">27</span><span class="p">;</span>
+</pre></div></div><p>which we’ll use to set the <code>TIM2-&gt;PSC</code> prescaler register.</p><p>We then need to work out the timer reload value we need to get trigger events at the required frequency. The timer counts up from zero to the value in the <code>ARR</code> reload register, then resets to zero. When the timer reloads its counter to zero, it generates an update event, which is what we use to pulse the TRGO trigger output.</p><p>The reload value is calculated as:</p><div class="highlight"><div class="source"><pre><span></span><span class="kt">uint32_t</span> <span class="n">timer_reload</span> <span class="o">=</span>
+  <span class="n">timer_clock_frequency</span> <span class="o">/</span> <span class="p">(</span><span class="n">timer_prescaler</span> <span class="o">*</span> <span class="n">TIMER_FREQUENCY</span><span class="p">);</span>
+</pre></div></div><p>Here, <code>TIMER_FREQUENCY</code> (1 Hz) is the desired timer update frequency. You can see that this makes sense by thinking about the calculation for a couple of indicative frequencies.</p><p>For a frequency of 1 Hz, with a 27 MHz input clock and a prescaler value of 27, we have that <code>timer_reload</code> = 1,000,000, i.e. we count up 1,000,000 pulses of the 1 MHz prescaled clock to give a total period between timer reloads of 1 second.</p><p>For a frequency of 100 Hz, again with a 27 MHz input clock and a prescaler value of 27, we have that <code>timer_reload</code> = 10,000, and we can count up to 10,000 one hunder times in the one second that it takes the 1 MHz prescaled input clock to count up to one million, i.e. we generate reload events 100 times per second.</p><p><strong>3. Configure timer</strong></p><p>As for other STM32 peripherals, the peripheral clock for the timer must be enabled, by setting the <code>TIM2EN</code> bit in the <code>RCC-&gt;APB1ENR</code> register.</p><p>The main part of the timer configuration consists of writing the appropriate values into the prescaler and reload value registers:</p><div class="highlight"><div class="source"><pre><span></span><span class="n">WRITE_REG</span><span class="p">(</span><span class="n">TIM2</span><span class="o">-&gt;</span><span class="n">PSC</span><span class="p">,</span> <span class="n">timer_prescaler</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span>
+<span class="n">WRITE_REG</span><span class="p">(</span><span class="n">TIM2</span><span class="o">-&gt;</span><span class="n">ARR</span><span class="p">,</span> <span class="n">timer_reload</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span>
+</pre></div></div><p>setting the timer mode (simple up-counter):</p><div class="highlight"><div class="source"><pre><span></span><span class="n">MODIFY_REG</span><span class="p">(</span><span class="n">TIM2</span><span class="o">-&gt;</span><span class="n">CR1</span><span class="p">,</span> <span class="p">(</span><span class="n">TIM_CR1_DIR</span> <span class="o">|</span> <span class="n">TIM_CR1_CMS</span><span class="p">),</span> <span class="mi">0</span><span class="p">);</span>
+</pre></div></div><p>and enabling the TRGO trigger output on update (i.e. counter reload) events:</p><div class="highlight"><div class="source"><pre><span></span><span class="n">MODIFY_REG</span><span class="p">(</span><span class="n">TIM2</span><span class="o">-&gt;</span><span class="n">CR2</span><span class="p">,</span> <span class="n">TIM_CR2_MMS</span><span class="p">,</span> <span class="mh">0x2</span> <span class="o">&lt;&lt;</span> <span class="n">TIM_CR2_MMS_Pos</span><span class="p">);</span>
+</pre></div></div><p>In the <code>ex4.c</code> code, we also enable timer interrupts for debugging purposes, but it’s not normally necessary to observe these interrupts: the trigger output from the timer starts the ADC conversion without any interrupts needing to be generated or serviced.</p><p><strong>4. Enable timer</strong></p><p>Once the timer is configured, it needs to be enabled by setting the <code>CEN</code> bit in the timer’s <code>CR1</code> configuration register:</p><div class="highlight"><div class="source"><pre><span></span><span class="n">SET_BIT</span><span class="p">(</span><span class="n">TIM2</span><span class="o">-&gt;</span><span class="n">CR1</span><span class="p">,</span> <span class="n">TIM_CR1_CEN</span><span class="p">);</span>
+</pre></div></div><p>One feature of the counters on the STM32 devices that requires some care is that register settings for things like prescaler and reload values are loaded into “shadow registers”, and only become active on a timer update event (essentially a roll-over when the reload value is reached by the timer’s counter). This prevents timer glitches when prescaler and reload values are modified while the timer is running.</p><p>When the timer is <em>not</em> running, reloads of the new configuration values need to be forced by manually generating a timer update event. This is done by writing to the timer’s <code>EGR</code> event generation register:</p><div class="highlight"><div class="source"><pre><span></span><span class="n">SET_BIT</span><span class="p">(</span><span class="n">TIM2</span><span class="o">-&gt;</span><span class="n">EGR</span><span class="p">,</span> <span class="n">TIM_EGR_UG</span><span class="p">);</span>
+</pre></div></div><p>This generates a timer update, and the timer starts running at the configured rate, generating trigger events each time the timer’s counter reaches the reload value.</p><h3>Main program</h3><p>As for the other examples, the main program for <code>ex4.c</code> is very simple: just a super-loop that examines some global flags set by interrupt service routines to detect DMA completion and timer events (for debugging). When a DMA transfer completes, the ADC conversion results are retrieved and sent out over the USART.</p><p>When this example is flashed to the Nucleo-144 board, ADC conversion results are written to the ST-Link’s virtual serial port once per second. This is the result that we wanted to achieve!</p><p>Here’s a quick recap of what’s happening here:</p><ol><li><p>The <code>TIM2</code> timer is running off the 27 MHz APB1 timer clock, using a prescaler of 27, so that the timer count register is updating at 1 MHz.</p></li><li><p>When the <code>TIM2</code> counter register values reaches 1,000,000 (the value in the <code>ARR</code> reload register), the timer counter is reset to zero.</p></li><li><p>When the <code>TIM2</code> timer resets its counter to zero, it generates a trigger pulse on its TRGO output. These trigger pulses occur at a frequency of 1 Hz.</p></li><li><p>The <code>TIM2</code> TRGO output is connected to the external trigger input of ADC <code>ADC1</code>. When a trigger pulse is generated by timer <code>TIM2</code>, the ADC starts its regular channel conversion sequence.</p></li><li><p>The contents of the <code>ADC1-&gt;SQRx</code> registers cause the ADC to convert four analog inputs one after another in scan mode.</p></li><li><p>The ADC is enabled for DMA transfers: after each ADC conversion is complete, a DMA transfer is initiated on stream 0 on <code>DMA2</code>.</p></li><li><p>The <code>DMA2</code> DMA controller transfers the latest ADC conversion result to the memory buffer configured in the DMA setup.</p></li><li><p>After four ADC conversions, the DMA controller raises a “transfer complete” interrupt to indicate that it has performed all four transfers for which it was configured.</p></li><li><p>In the ISR for the the DMA’s “transfer complete” interrupt, we set a flag that is observed in the main program loop and is used to process the ADC samples collected into our buffer.</p></li></ol><p>Apart from the final processing of the buffered results in response to the DMA interrupt, all of this happens without any action from the main processor core.</p><h2>Example 5: wannabe USB oscilloscope</h2><p>So we can do the thing we wanted to do, but it’s a bit of an anticlimax. We’re collecting data on a regular timer, but we’re not doing much with it. That seems boring, so I decided to knock together a (completely useless) USB oscilloscope demonstration. This comes in two parts:</p><h3>STM32 data capture program</h3><p>The STM32 data-capture part of the code is in <a href="https://github.com/ian-ross/stm32-timer-adc-dma/blob/main/ex5.c"><code>ex5.c</code></a>. This is identical to <code>ex4.c</code>, except that the data is written to the USART as binary values (instead of being formatted to ASCII strings) and the sample rate is higher (500 Hz).</p><h3>Python mini-oscilloscope application</h3><p>The display side of the code, which runs on a PC, is written in Python, and is <a href="https://github.com/ian-ross/stm32-timer-adc-dma/blob/main/ex5-view.py"><code>ex5-view.py</code></a>. This uses the <code>pyserial</code> library to read data from the USB virtual serial port, and the <code>pygame</code> library to do very simple data plotting and display.</p><p>This can’t be considered anything more than a very little demonstration, but it does work, it shows how easy it is to make these kinds of small and simple data display applications.</p><h3>Experimental setup and screenshots</h3><p>Here, I set up an Analog Discovery 2 as a waveform generator, connected its output channel to the first ADC input I’m using, and used the Python code to display the captured waveforms.</p><p>Here’s a 50 Hz sinewave:</p><p><a href="./sky blue trades _ STM32 Timer + ADC + DMA_ Part 3_files/ex5-sine.png" target="_blank"><img alt="USB &quot;oscilloscope&quot; sine wave" src="./sky blue trades _ STM32 Timer + ADC + DMA_ Part 3_files/ex5-sine.png"></a></p><p>Here’s a triangle wave:</p><p><a href="./sky blue trades _ STM32 Timer + ADC + DMA_ Part 3_files/ex5-triangle.png" target="_blank"><img alt="USB &quot;oscilloscope&quot; triangle wave" src="./sky blue trades _ STM32 Timer + ADC + DMA_ Part 3_files/ex5-triangle.png"></a></p><p>Here’s a more complex composite waveform:</p><p><a href="./sky blue trades _ STM32 Timer + ADC + DMA_ Part 3_files/ex5-composite.png" target="_blank"><img alt="USB &quot;oscilloscope&quot; composite waveform" src="./sky blue trades _ STM32 Timer + ADC + DMA_ Part 3_files/ex5-composite.png"></a></p><h2>Conclusions</h2><p>You could definitely set all this up more quickly using the tools in the STM32Cube IDE and using the STM32 HAL hardware abstraction layer libraries, but I bet you wouldn’t end up understanding as much about how peripherals work together in STM32F7 MCUs!</p><p>Learning this stuff is unfortunately quite a bit of work, as you have to spend a lot of time reading the processor reference manual and wading through descriptions of lots of registers and lots of modes of operation of the peripherals. But I do think it’s worthwhile going through things this way at least once for a few different setups on your MCU before you dive into using the HAL.</p>
+
+
+    </section>
+    <hr>
+    <footer>
+      <div>Copyright 2011-2021 Ian Ross</div>
+      <div>This work is licensed under <a href="http://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer">CC BY-SA 4.0<img src="./sky blue trades _ STM32 Timer + ADC + DMA_ Part 3_files/cc.svg"><img src="./sky blue trades _ STM32 Timer + ADC + DMA_ Part 3_files/by.svg"><img src="./sky blue trades _ STM32 Timer + ADC + DMA_ Part 3_files/sa.svg"></a></div>
+    </footer>
+  </article>
+  <script>
+    window.MathJax = { tex: { inlineMath: [['$','$']] } };
+  </script>
+  <script id="MathJax-script" async="" src="./sky blue trades _ STM32 Timer + ADC + DMA_ Part 3_files/tex-mml-chtml.js"></script>
+
+
+
+
+
+</body></html>

@@ -34,3 +34,8 @@ Depending on your Linux distribution (or if you're using Windows),
 you may need to change it. Search for the string "`/dev/ttyACM0`" and
 replace it with whatever your operating system uses for the USB
 virtual serial port from the ST-Link on the Nucleo board.
+
+https://skybluetrades.net/tutorials/stm32-adc-dma-timers/
+https://skybluetrades.net/blog/2020/11/2020-11-24-stm32-timer-adc-dma-1/
+https://skybluetrades.net/blog/2020/11/2020-11-25-stm32-timer-adc-dma-2/
+https://skybluetrades.net/blog/2020/11/2020-11-26-stm32-timer-adc-dma-3/

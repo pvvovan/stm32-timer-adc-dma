@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<!-- saved from url=(0072)https://skybluetrades.net/blog/2020/11/2020-11-25-stm32-timer-adc-dma-2/ -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <title>sky blue trades  | STM32 Timer + ADC + DMA: Part 2</title>
+  <link rel="stylesheet" href="./sky blue trades _ STM32 Timer + ADC + DMA_ Part 2_files/style.css">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="./sky blue trades _ STM32 Timer + ADC + DMA_ Part 2_files/polyfill.min.js"></script>
+
+
+<style type="text/css">.CtxtMenu_InfoClose {  top:.2em; right:.2em;}
+.CtxtMenu_InfoContent {  overflow:auto; text-align:left; font-size:80%;  padding:.4em .6em; border:1px inset; margin:1em 0px;  max-height:20em; max-width:30em; background-color:#EEEEEE;  white-space:normal;}
+.CtxtMenu_Info.CtxtMenu_MousePost {outline:none;}
+.CtxtMenu_Info {  position:fixed; left:50%; width:auto; text-align:center;  border:3px outset; padding:1em 2em; background-color:#DDDDDD;  color:black;  cursor:default; font-family:message-box; font-size:120%;  font-style:normal; text-indent:0; text-transform:none;  line-height:normal; letter-spacing:normal; word-spacing:normal;  word-wrap:normal; white-space:nowrap; float:none; z-index:201;  border-radius: 15px;                     /* Opera 10.5 and IE9 */  -webkit-border-radius:15px;               /* Safari and Chrome */  -moz-border-radius:15px;                  /* Firefox */  -khtml-border-radius:15px;                /* Konqueror */  box-shadow:0px 10px 20px #808080;         /* Opera 10.5 and IE9 */  -webkit-box-shadow:0px 10px 20px #808080; /* Safari 3 & Chrome */  -moz-box-shadow:0px 10px 20px #808080;    /* Forefox 3.5 */  -khtml-box-shadow:0px 10px 20px #808080;  /* Konqueror */  filter:progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color="gray", Positive="true"); /* IE */}
+</style><style type="text/css">.CtxtMenu_MenuClose {  position:absolute;  cursor:pointer;  display:inline-block;  border:2px solid #AAA;  border-radius:18px;  -webkit-border-radius: 18px;             /* Safari and Chrome */  -moz-border-radius: 18px;                /* Firefox */  -khtml-border-radius: 18px;              /* Konqueror */  font-family: "Courier New", Courier;  font-size:24px;  color:#F0F0F0}
+.CtxtMenu_MenuClose span {  display:block; background-color:#AAA; border:1.5px solid;  border-radius:18px;  -webkit-border-radius: 18px;             /* Safari and Chrome */  -moz-border-radius: 18px;                /* Firefox */  -khtml-border-radius: 18px;              /* Konqueror */  line-height:0;  padding:8px 0 6px     /* may need to be browser-specific */}
+.CtxtMenu_MenuClose:hover {  color:white!important;  border:2px solid #CCC!important}
+.CtxtMenu_MenuClose:hover span {  background-color:#CCC!important}
+.CtxtMenu_MenuClose:hover:focus {  outline:none}
+</style><style type="text/css">.CtxtMenu_Menu {  position:absolute;  background-color:white;  color:black;  width:auto; padding:5px 0px;  border:1px solid #CCCCCC; margin:0; cursor:default;  font: menu; text-align:left; text-indent:0; text-transform:none;  line-height:normal; letter-spacing:normal; word-spacing:normal;  word-wrap:normal; white-space:nowrap; float:none; z-index:201;  border-radius: 5px;                     /* Opera 10.5 and IE9 */  -webkit-border-radius: 5px;             /* Safari and Chrome */  -moz-border-radius: 5px;                /* Firefox */  -khtml-border-radius: 5px;              /* Konqueror */  box-shadow:0px 10px 20px #808080;         /* Opera 10.5 and IE9 */  -webkit-box-shadow:0px 10px 20px #808080; /* Safari 3 & Chrome */  -moz-box-shadow:0px 10px 20px #808080;    /* Forefox 3.5 */  -khtml-box-shadow:0px 10px 20px #808080;  /* Konqueror */}
+.CtxtMenu_MenuItem {  padding: 1px 2em;  background:transparent;}
+.CtxtMenu_MenuArrow {  position:absolute; right:.5em; padding-top:.25em; color:#666666;  font-family: null; font-size: .75em}
+.CtxtMenu_MenuActive .CtxtMenu_MenuArrow {color:white}
+.CtxtMenu_MenuArrow.CtxtMenu_RTL {left:.5em; right:auto}
+.CtxtMenu_MenuCheck {  position:absolute; left:.7em;  font-family: null}
+.CtxtMenu_MenuCheck.CtxtMenu_RTL { right:.7em; left:auto }
+.CtxtMenu_MenuRadioCheck {  position:absolute; left: .7em;}
+.CtxtMenu_MenuRadioCheck.CtxtMenu_RTL {  right: .7em; left:auto}
+.CtxtMenu_MenuInputBox {  padding-left: 1em; right:.5em; color:#666666;  font-family: null;}
+.CtxtMenu_MenuInputBox.CtxtMenu_RTL {  left: .1em;}
+.CtxtMenu_MenuComboBox {  left:.1em; padding-bottom:.5em;}
+.CtxtMenu_MenuSlider {  left: .1em;}
+.CtxtMenu_SliderValue {  position:absolute; right:.1em; padding-top:.25em; color:#333333;  font-size: .75em}
+.CtxtMenu_SliderBar {  outline: none; background: #d3d3d3}
+.CtxtMenu_MenuLabel {  padding: 1px 2em 3px 1.33em;  font-style:italic}
+.CtxtMenu_MenuRule {  border-top: 1px solid #DDDDDD;  margin: 4px 3px;}
+.CtxtMenu_MenuDisabled {  color:GrayText}
+.CtxtMenu_MenuActive {  background-color: #606872;  color: white;}
+.CtxtMenu_MenuDisabled:focus {  background-color: #E8E8E8}
+.CtxtMenu_MenuLabel:focus {  background-color: #E8E8E8}
+.CtxtMenu_ContextMenu:focus {  outline:none}
+.CtxtMenu_ContextMenu .CtxtMenu_MenuItem:focus {  outline:none}
+.CtxtMenu_SelectionMenu {  position:relative; float:left;  border-bottom: none; -webkit-box-shadow:none; -webkit-border-radius:0px; }
+.CtxtMenu_SelectionItem {  padding-right: 1em;}
+.CtxtMenu_Selection {  right: 40%; width:50%; }
+.CtxtMenu_SelectionBox {  padding: 0em; max-height:20em; max-width: none;  background-color:#FFFFFF;}
+.CtxtMenu_SelectionDivider {  clear: both; border-top: 2px solid #000000;}
+.CtxtMenu_Menu .CtxtMenu_MenuClose {  top:-10px; left:-10px}
+</style><style id="MJX-CHTML-styles">
+mjx-container[jax="CHTML"] {
+  line-height: 0;
+}
+
+mjx-container [space="1"] {
+  margin-left: .111em;
+}
+
+mjx-container [space="2"] {
+  margin-left: .167em;
+}
+
+mjx-container [space="3"] {
+  margin-left: .222em;
+}
+
+mjx-container [space="4"] {
+  margin-left: .278em;
+}
+
+mjx-container [space="5"] {
+  margin-left: .333em;
+}
+
+mjx-container [rspace="1"] {
+  margin-right: .111em;
+}
+
+mjx-container [rspace="2"] {
+  margin-right: .167em;
+}
+
+mjx-container [rspace="3"] {
+  margin-right: .222em;
+}
+
+mjx-container [rspace="4"] {
+  margin-right: .278em;
+}
+
+mjx-container [rspace="5"] {
+  margin-right: .333em;
+}
+
+mjx-container [size="s"] {
+  font-size: 70.7%;
+}
+
+mjx-container [size="ss"] {
+  font-size: 50%;
+}
+
+mjx-container [size="Tn"] {
+  font-size: 60%;
+}
+
+mjx-container [size="sm"] {
+  font-size: 85%;
+}
+
+mjx-container [size="lg"] {
+  font-size: 120%;
+}
+
+mjx-container [size="Lg"] {
+  font-size: 144%;
+}
+
+mjx-container [size="LG"] {
+  font-size: 173%;
+}
+
+mjx-container [size="hg"] {
+  font-size: 207%;
+}
+
+mjx-container [size="HG"] {
+  font-size: 249%;
+}
+
+mjx-container [width="full"] {
+  width: 100%;
+}
+
+mjx-box {
+  display: inline-block;
+}
+
+mjx-block {
+  display: block;
+}
+
+mjx-itable {
+  display: inline-table;
+}
+
+mjx-row {
+  display: table-row;
+}
+
+mjx-row > * {
+  display: table-cell;
+}
+
+mjx-mtext {
+  display: inline-block;
+}
+
+mjx-mstyle {
+  display: inline-block;
+}
+
+mjx-merror {
+  display: inline-block;
+  color: red;
+  background-color: yellow;
+}
+
+mjx-mphantom {
+  visibility: hidden;
+}
+
+_::-webkit-full-page-media, _:future, :root mjx-container {
+  will-change: opacity;
+}
+
+mjx-assistive-mml {
+  position: absolute !important;
+  top: 0px;
+  left: 0px;
+  clip: rect(1px, 1px, 1px, 1px);
+  padding: 1px 0px 0px 0px !important;
+  border: 0px !important;
+  display: block !important;
+  width: auto !important;
+  overflow: hidden !important;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+mjx-assistive-mml[display="block"] {
+  width: 100% !important;
+}
+
+mjx-c::before {
+  display: block;
+  width: 0;
+}
+
+.MJX-TEX {
+  font-family: MJXZERO, MJXTEX;
+}
+
+.TEX-B {
+  font-family: MJXZERO, MJXTEX-B;
+}
+
+.TEX-I {
+  font-family: MJXZERO, MJXTEX-I;
+}
+
+.TEX-MI {
+  font-family: MJXZERO, MJXTEX-MI;
+}
+
+.TEX-BI {
+  font-family: MJXZERO, MJXTEX-BI;
+}
+
+.TEX-S1 {
+  font-family: MJXZERO, MJXTEX-S1;
+}
+
+.TEX-S2 {
+  font-family: MJXZERO, MJXTEX-S2;
+}
+
+.TEX-S3 {
+  font-family: MJXZERO, MJXTEX-S3;
+}
+
+.TEX-S4 {
+  font-family: MJXZERO, MJXTEX-S4;
+}
+
+.TEX-A {
+  font-family: MJXZERO, MJXTEX-A;
+}
+
+.TEX-C {
+  font-family: MJXZERO, MJXTEX-C;
+}
+
+.TEX-CB {
+  font-family: MJXZERO, MJXTEX-CB;
+}
+
+.TEX-FR {
+  font-family: MJXZERO, MJXTEX-FR;
+}
+
+.TEX-FRB {
+  font-family: MJXZERO, MJXTEX-FRB;
+}
+
+.TEX-SS {
+  font-family: MJXZERO, MJXTEX-SS;
+}
+
+.TEX-SSB {
+  font-family: MJXZERO, MJXTEX-SSB;
+}
+
+.TEX-SSI {
+  font-family: MJXZERO, MJXTEX-SSI;
+}
+
+.TEX-SC {
+  font-family: MJXZERO, MJXTEX-SC;
+}
+
+.TEX-T {
+  font-family: MJXZERO, MJXTEX-T;
+}
+
+.TEX-V {
+  font-family: MJXZERO, MJXTEX-V;
+}
+
+.TEX-VB {
+  font-family: MJXZERO, MJXTEX-VB;
+}
+
+mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
+  font-family: MJXZERO, MJXTEX-S1, MJXTEX-S4, MJXTEX, MJXTEX-A ! important;
+}
+
+@font-face /* 0 */ {
+  font-family: MJXZERO;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Zero.woff") format("woff");
+}
+
+@font-face /* 1 */ {
+  font-family: MJXTEX;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Main-Regular.woff") format("woff");
+}
+
+@font-face /* 2 */ {
+  font-family: MJXTEX-B;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Main-Bold.woff") format("woff");
+}
+
+@font-face /* 3 */ {
+  font-family: MJXTEX-I;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Math-Italic.woff") format("woff");
+}
+
+@font-face /* 4 */ {
+  font-family: MJXTEX-MI;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Main-Italic.woff") format("woff");
+}
+
+@font-face /* 5 */ {
+  font-family: MJXTEX-BI;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Math-BoldItalic.woff") format("woff");
+}
+
+@font-face /* 6 */ {
+  font-family: MJXTEX-S1;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Size1-Regular.woff") format("woff");
+}
+
+@font-face /* 7 */ {
+  font-family: MJXTEX-S2;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Size2-Regular.woff") format("woff");
+}
+
+@font-face /* 8 */ {
+  font-family: MJXTEX-S3;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Size3-Regular.woff") format("woff");
+}
+
+@font-face /* 9 */ {
+  font-family: MJXTEX-S4;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Size4-Regular.woff") format("woff");
+}
+
+@font-face /* 10 */ {
+  font-family: MJXTEX-A;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_AMS-Regular.woff") format("woff");
+}
+
+@font-face /* 11 */ {
+  font-family: MJXTEX-C;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Calligraphic-Regular.woff") format("woff");
+}
+
+@font-face /* 12 */ {
+  font-family: MJXTEX-CB;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Calligraphic-Bold.woff") format("woff");
+}
+
+@font-face /* 13 */ {
+  font-family: MJXTEX-FR;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Fraktur-Regular.woff") format("woff");
+}
+
+@font-face /* 14 */ {
+  font-family: MJXTEX-FRB;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Fraktur-Bold.woff") format("woff");
+}
+
+@font-face /* 15 */ {
+  font-family: MJXTEX-SS;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_SansSerif-Regular.woff") format("woff");
+}
+
+@font-face /* 16 */ {
+  font-family: MJXTEX-SSB;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_SansSerif-Bold.woff") format("woff");
+}
+
+@font-face /* 17 */ {
+  font-family: MJXTEX-SSI;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_SansSerif-Italic.woff") format("woff");
+}
+
+@font-face /* 18 */ {
+  font-family: MJXTEX-SC;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Script-Regular.woff") format("woff");
+}
+
+@font-face /* 19 */ {
+  font-family: MJXTEX-T;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Typewriter-Regular.woff") format("woff");
+}
+
+@font-face /* 20 */ {
+  font-family: MJXTEX-V;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Vector-Regular.woff") format("woff");
+}
+
+@font-face /* 21 */ {
+  font-family: MJXTEX-VB;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Vector-Bold.woff") format("woff");
+}
+</style></head>
+<body>
+  <header class="site-header" id="site-header">
+    <nav>
+      <div class="header-section">
+        <div class="logo"><a href="https://skybluetrades.net/">sky blue trades</a></div>
+        <label id="menu-label" for="menu-toggle">
+          <svg viewBox="0 0 100 80" width="40" height="40">
+            <rect y="10" width="100" height="15"></rect>
+            <rect y="40" width="100" height="15"></rect>
+            <rect y="70" width="100" height="15"></rect>
+          </svg>
+        </label>
+        <input type="checkbox" id="menu-toggle">
+        <ul class="menu-items">
+          <li><a href="https://skybluetrades.net/projects/">Projects</a></li>
+          <li><a href="https://skybluetrades.net/tutorials">Tutorials</a></li>
+          <li><a href="https://skybluetrades.net/blog">Blog</a></li>
+          <li><a href="https://skybluetrades.net/hire-me.html">Hire me!</a></li>
+          <li class="top-header"><a href="https://skybluetrades.net/search.html"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg> Search</a></li>
+          <li class="top-header"><a href="https://skybluetrades.net/feed.xml"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg> RSS feed</a></li>
+      </ul></div>
+        
+      
+      <div class="right-header">
+        <a href="https://skybluetrades.net/search.html"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></a>
+        <a href="https://skybluetrades.net/feed.xml"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a>
+      </div>
+    </nav>
+  </header>
+  <article class="maincontent">
+
+    <h1>STM32 Timer + ADC + DMA: Part 2</h1>
+    <div class="title-info"><span class="title-date">25 Nov 2020</span><span class="category"><a href="https://skybluetrades.net/blog/category/embedded.html">embedded</a></span><span class="category"><a href="https://skybluetrades.net/blog/category/stm32.html">stm32</a></span></div>
+    <section>
+      <p>In this second article of three, we’re going to change our polling ADC example from the <a href="https://skybluetrades.net/blog/2020/11/2020-11-24-stm32-timer-adc-dma-1">first article</a> to use DMA.</p><p>DMA is a subject that is unavoidably a little complicated. It’s useful to understand what DMA really is to get an idea of where that complexity comes from. That might help to build some enthusiasm to battle your way through the DMA section of the reference manual!</p><p>There’s a <a href="https://youtu.be/GisdV5D7A8o">video demonstrating each of the examples</a> covered in this series of articles. It’s probably most useful to watch it in conjunction with reading the articles.</p><h2>What is DMA?</h2><p>DMA stands for <em>Direct Memory Access</em>. That’s 100% accurate, but less than 100% illuminating. The easiest way to understand what DMA is for is to think about some tasks you might need to perform in embedded code. Here are some things you might do:</p><ul><li><p>Read bytes from a USART or other peripheral into a memory buffer.</p></li><li><p>Send bytes from a memory buffer to a USART or other peripheral.</p></li><li><p>Move a sequence of bytes from one region of memory to another.</p></li></ul><p>Memory-to-peripheral and peripheral-to-memory transfers are particularly common in embedded programming. They’re completely routine, and it seems like there ought to be some way to automate them. And that’s just what a DMA controller does.</p><p>Roughly, a DMA controller is a machine for moving data from one place in memory to another place in memory without the involvement of the main processor. DMA controllers in MCUs usually support transfers to and from memory and to and from peripherals. Peripheral transfers often involve an extra bit of machinery at the peripheral end to allow the DMA controller to squirt data into or out of the peripheral, but we don’t need to know the details of how that works.</p><p>Sounds simple enough. So why is DMA so complicated? (To be fair, the DMA section of the STM32F767 reference manual is only 35 pages, but they’re dense and perplexing pages!)</p><p>On the hardware side, a DMA controller seems conceptually quite simple: a couple of counters to keep track of how many bytes to transfer and the current source and destination addresses, plus some logic to drive the memory interface. The complexity arises mostly because DMA needs some mechanism for bus arbitration between the central processor core (which is continuously reading instructions and reading and writing data from memory and peripherals) and the DMA controller (which also wants to access memory and peripherals).</p><p>On the software side, there are lots of ways you might want do DMA:</p><ul><li><p>If you’re transferring from a peripheral, do you know in advance how many bytes you’re transferring, or will the peripheral decide when it’s done sending? This determines which end (peripheral or DMA controller) is the <em>flow controller</em> for the transfer.</p></li><li><p>How wide are the data transfers? The STM32F7 has 12-bit ADCs, so DMA transfers for ADC use 16-bit half-word transfers. A USART is going to be sending bytes, so the transfers will be 8 bits wide. Other peripherals might transfer 32-bit words. (There’s some additional complexity here, because the STM32 DMA controllers can do some data packing and endianness conversion, so there are other options to set up.)</p></li><li><p>Do you want to do burst transfers? A burst transfer keeps hold of the bus the transfer is happening on for an extended period: that trades a potentially higher DMA data transfer bandwidth against greater bus contention with the CPU.</p></li><li><p>How do you want to manage data buffers in memory? Circular buffers? Double buffering? Do you want to use the FIFO buffers built into the DMA controller?</p></li><li><p>If you have multiple DMA streams running at once, how is access to the memory bus prioritised?</p></li></ul><p>And we’ve not even talked about the machinery for setting up which peripherals are assigned to which DMA streams...</p><p>DMA controllers are general tools that try to support more or less all the ways you imagine of using them, so they’re necessarily a little complicated. On an MCU, they’re also a kind of centralised shared resource, and the assignment of DMA resources to different peripherals can be complicated.</p><h2>DMA on the STM32F767</h2><p>We’re going to use a very small subset of the functionality of the STM32F767’s DMA controllers. In this section, I’m going to describe the STM32F767’s DMA controllers at a high level and talk about the mechanism for associating peripherals with DMA controllers, since that’s potentially the most confusing thing for getting going with DMA. In the next section we’ll look at the specific configuration we need to use DMA with ADC.</p><p>So, first of all, I keep saying “DMA <em>controllers</em>”, like there’s more than one. There are two, called <code>DMA1</code> and <code>DMA2</code>. Each controller is attached to a different set of peripherals. These assignments are defined in the following pair of tables from the STM32F767 reference manual:</p><p><a href="./sky blue trades _ STM32 Timer + ADC + DMA_ Part 2_files/rm-dma-streams.png" target="_blank"><img alt="DMA channel assignments" src="./sky blue trades _ STM32 Timer + ADC + DMA_ Part 2_files/rm-dma-streams.png"></a></p><p>The reference manual uses two terms that are confusing the first time you see them:</p><ul><li><p><strong>DMA streams</strong> are best thought of as potential interrupt sources, since that’s the way you usually interact with them at a software level. They represent independent transfer capabilities within a DMA controller, and each stream can be attached to one of a small set of peripherals by associating a <em>DMA channel</em> with the stream.</p></li><li><p><strong>DMA channels</strong> are the connections between the DMA controller and a specific peripheral.</p></li></ul><p>An example might make this clearer. Suppose you want to do DMA transfers for receiving data from <code>USART1</code>. Locate <code>USART1_RX</code> in the tables above, and you’ll see two entries in the <code>DMA2</code> table, one for “Stream 2, Channel 4” and one for “Stream 5, Channel 4”.</p><p>Let’s say we decide to use stream 2. We can enable DMA for <code>USART1_RX</code> by selecting channel 4 for stream 2 on <code>DMA2</code> by assigning the value 4 to the <code>CHSEL</code> channel selection field of the <code>DMA2-&gt;S2CR</code> configuration register. Once this is done and the rest of the DMA configuration is complete, <code>DMA2_Stream2</code> interrupts will occur when DMA transfers from USART1 to memory complete.</p><blockquote><p>A <strong>DMA stream</strong> is a source of interrupts from the DMA controller. A <strong>DMA channel</strong> is a connection between a peripheral and a DMA controller.</p></blockquote><p>If you look carefully at the tables above, you’ll see that you can’t use DMA with all the peripherals on the STM32F767 at the same time. The table for <code>DMA1</code> lists 51 distinct peripheral connections, and the table for <code>DMA1</code> lists 46 distinct peripherals, but each of <code>DMA1</code> and <code>DMA2</code> only have 8 DMA streams that can be assigned to peripherals at any one time. There is some redundancy of assignments, to help with using DMA with multiple peripherals at the same time, but you still need to think carefully to make sure that it’s possible to set up DMA for all the peripherals you want to use it with.</p><p>This is especially true for some peripherals that can only be attached to a single DMA stream. For example, if you want to use DMA with the STM32F767’s cryptographic processor (for AES encryption and decryption, say), you need to assign streams 5 and 6 on <code>DMA2</code>, since the <code>CRYP_IN</code> and <code>CRYP_OUT</code> peripheral connections aren’t available on any other streams. If you also want to do JPEG encoding and decoding, you need to assign either streams 0 and 1, 0 and 4, 3 and 1 or 3 and 4 (those are the combinations that cover the <code>JPEG_IN</code> and <code>JPEG_OUT</code> peripheral connections). Once you’ve done that, you can no longer use DMA with both of the SD/SDIO/MMC interfaces (for reading and writing SD cards and eMMC devices), since whichever streams you assign to the JPEG codec block off the remaining available stream for one of the SD/SDIO/MMC controllers.</p><p>You can switch DMA stream assignments around as you need to, but doing that definitely complicates your code, and it’s much easier to work with a static assignment of peripherals to DMA streams when you can. Just be aware that that’s not always possible, and it may require some headscratching and careful examination of the tables above to work out a good assignment.</p><p>(This discussion is specific to the STM32F7 microcontrollers. The DMA controller in the STM32H7 MCUs, for example, is more convenient to use, because the DMA controller is split from the stream/channel assignment system, which lives in a separate <code>DMAMUX</code> DMA multiplexer peripheral. That means you can assign any peripheral to any stream, which makes life simpler.)</p><h2>DMA and ADC</h2><p>For our use case, we need a single DMA stream connected to the <code>ADC1</code> peripheral. <code>ADC1</code> appears in the <code>DMA2</code> table above, and is available on stream 0, channel 0 or stream 0, channel 4. We’ll use stream 0, channel 0 for our examples.</p><p>This means that we will receive interrupts from the <code>DMA2</code> DMA controller via the <code>DMA2_Stream0_IRQHandler</code> interrupt service routine. We can check DMA controller status flags in that interrupt handler to determine whether we have a DMA error or a “transfer complete” event. (It’s also possible to be notified when a transfer is half complete, which is useful for keeping the DMA FIFOs full if you’re using them.)</p><p>We’ll now look at two examples of how to set this up.</p><h2>Example 2: DMA ADC for a single input</h2><p>In our <a href="https://github.com/ian-ross/stm32-timer-adc-dma/blob/main/ex2.c">first DMA example, which is in <code>ex2.c</code></a>, we’re going to collect a single ADC sample using DMA, triggered on a button press. The effective result of this will be identical to our first polled ADC example, but it will give us a basis for doing more interesting things.</p><h3>ADC configuration</h3><p>There is no difference in the ADC configuration to the polled ADC example. Management of the ADC’s DMA mode is done when triggering the conversion, because the ADC’s DMA enable state needs to be reset between conversions.</p><h3>DMA configuration</h3><p>There are six steps to setting up the DMA controller:</p><p><strong>1. Enable DMA peripheral clock.</strong></p><p>You need to enable the peripheral clock for the DMA controller, otherwise it won’t do anything at all. It might seem strange to think of a DMA controller as a <em>peripheral</em>, but it’s a bit of silicon in the MCU that can be powered on or off independently, so it has a peripheral clock to do that.</p><p>We do this in the same way as for other peripherals. The DMA controllers are on the AHB1 bus:</p><div class="highlight"><div class="source"><pre><span></span><span class="k">volatile</span> <span class="kt">uint32_t</span> <span class="n">tmpreg</span><span class="p">;</span>
+<span class="n">SET_BIT</span><span class="p">(</span><span class="n">RCC</span><span class="o">-&gt;</span><span class="n">AHB1ENR</span><span class="p">,</span> <span class="n">RCC_AHB1ENR_DMA2EN</span><span class="p">);</span>
+<span class="n">tmpreg</span> <span class="o">=</span> <span class="n">READ_BIT</span><span class="p">(</span><span class="n">RCC</span><span class="o">-&gt;</span><span class="n">AHB1ENR</span><span class="p">,</span> <span class="n">RCC_AHB1ENR_DMA2EN</span><span class="p">);</span>
+<span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="n">tmpreg</span><span class="p">;</span>
+</pre></div></div><p><strong>2. Select peripheral channel for DMA stream</strong></p><p>We need to set up the association between the DMA stream we’re using (stream 0 on controller <code>DMA2</code>) and the channel, i.e. the peripheral, we want to connect that stream to. This is handled by assigning a channel number to the <code>CHSEL</code> channel selection field of the <code>DMA2_Stream0-&gt;CR</code> configuration register:</p><p><a href="./sky blue trades _ STM32 Timer + ADC + DMA_ Part 2_files/rm-dma-chsel.png" target="_blank"><img alt="DMA channel select" src="./sky blue trades _ STM32 Timer + ADC + DMA_ Part 2_files/rm-dma-chsel.png"></a></p><p>We want channel 0 (from the "<code>DMA2</code> request mapping” table we looked at earlier), so we do this:</p><div class="highlight"><div class="source"><pre><span></span><span class="n">MODIFY_REG</span><span class="p">(</span><span class="n">DMA2_Stream0</span><span class="o">-&gt;</span><span class="n">CR</span><span class="p">,</span> <span class="n">DMA_SxCR_CHSEL</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">);</span>
+</pre></div></div><p><strong>3. Configure DMA transfer</strong></p><p>The DMA controller has lots of options to control how transfers happen. These options are all set in the per-stream <code>CR</code> configuration register, i.e. in <code>DMA2_Stream0-&gt;CR</code> for our case. Here’s what we do (we’ll talk through the options below):</p><div class="highlight"><div class="source"><pre><span></span><span class="n">MODIFY_REG</span><span class="p">(</span><span class="n">DMA2_Stream0</span><span class="o">-&gt;</span><span class="n">CR</span><span class="p">,</span>
+           <span class="n">DMA_SxCR_DIR</span> <span class="o">|</span> <span class="n">DMA_SxCR_CIRC</span> <span class="o">|</span> <span class="n">DMA_SxCR_PINC</span> <span class="o">|</span> <span class="n">DMA_SxCR_MINC</span> <span class="o">|</span>
+           <span class="n">DMA_SxCR_PSIZE</span> <span class="o">|</span> <span class="n">DMA_SxCR_MSIZE</span> <span class="o">|</span> <span class="n">DMA_SxCR_PL</span> <span class="o">|</span> <span class="n">DMA_SxCR_PFCTRL</span><span class="p">,</span>
+           <span class="mh">0x00000000U</span> <span class="o">|</span>      <span class="c1">// Direction: peripheral to memory</span>
+           <span class="mh">0x00000000U</span> <span class="o">|</span>      <span class="c1">// Peripheral: no increment</span>
+           <span class="n">DMA_SxCR_MINC</span> <span class="o">|</span>    <span class="c1">// Memory: increment</span>
+           <span class="n">DMA_SxCR_PSIZE_0</span> <span class="o">|</span> <span class="c1">// Peripheral data align: halfword</span>
+           <span class="n">DMA_SxCR_MSIZE_0</span> <span class="o">|</span> <span class="c1">// Memory data align: halfword</span>
+           <span class="n">DMA_SxCR_CIRC</span> <span class="o">|</span>    <span class="c1">// Mode: circular</span>
+           <span class="n">DMA_SxCR_PL_1</span><span class="p">);</span>    <span class="c1">// Priority: high</span>
+</pre></div></div><p>We want:</p><ul><li><p><strong>DMA direction</strong>: from peripheral to memory;</p></li><li><p><strong>Address increment</strong>: no increment at the peripheral end (because we’re just going to read data from the fixed address of the <code>ADC1-&gt;DR</code> data register); enable increment at the memory end (because we’re going to want to put ADC samples into a memory buffer one after another);</p></li><li><p><strong>Transfer data sizes</strong>: ADC samples are 12 bits wide, so we use half-word transfers (i.e. 16 bits) at both ends—it’s possible to get the DMA controller to do various kinds of data packing and unpacking as it transfers data, but we don’t need that here;</p></li><li><p><strong>Circular mode</strong>: this is an option that allows us to start the ADC+DMA conversion and transfer process repeatedly, which is useful if you don’t need to change any setup between conversions;</p></li><li><p><strong>Transfer priority</strong>: we don’t care much here, since we’re just doing one DMA transfer, so we’ll set it to high.</p></li></ul><p>Figuring out how to set all these options can be hard work. It’s worth read Section 8 of the reference manual carefully. This describes everything the DMA controllers can do.</p><p><strong>4. Set DMA transfer addresses and size</strong></p><p>The other options we need to set for the DMA controller are the most important: the base source and destination addresses we’re using and the number of items we want to transfer. For the addresses, our source is the <code>ADC1-&gt;DR</code> data register of the ADC, and the destination is the address of a normal variable that we’ve defined:</p><div class="highlight"><div class="source"><pre><span></span><span class="k">static</span> <span class="k">volatile</span> <span class="kt">uint16_t</span> <span class="n">dma_adc_sample</span><span class="p">;</span>
+
+  <span class="p">...</span>
+
+  <span class="n">WRITE_REG</span><span class="p">(</span><span class="n">DMA2_Stream0</span><span class="o">-&gt;</span><span class="n">PAR</span><span class="p">,</span> <span class="p">(</span><span class="kt">uint32_t</span><span class="p">)</span><span class="o">&amp;</span><span class="p">(</span><span class="n">ADC1</span><span class="o">-&gt;</span><span class="n">DR</span><span class="p">));</span>
+  <span class="n">WRITE_REG</span><span class="p">(</span><span class="n">DMA2_Stream0</span><span class="o">-&gt;</span><span class="n">M0AR</span><span class="p">,</span> <span class="p">(</span><span class="kt">uint32_t</span><span class="p">)</span><span class="o">&amp;</span><span class="n">dma_adc_sample</span><span class="p">);</span>
+</pre></div></div><p>In this example, we’re only going to do a single conversion from a single analog input, so we only need a single <code>uint16_t</code> value to store our conversion results. And we tell the DMA controller to perform only a single transfer by setting the DMA streams <code>NDTR</code> register:</p><div class="highlight"><div class="source"><pre><span></span><span class="n">MODIFY_REG</span><span class="p">(</span><span class="n">DMA2_Stream0</span><span class="o">-&gt;</span><span class="n">NDTR</span><span class="p">,</span> <span class="n">DMA_SxNDT</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+</pre></div></div><p>This register decrements after each item is transferred on the DMA stream. When it reaches zero, a DMA transfer complete interrupt is triggered (if enabled) and, if circular mode is enabled for the stream, the previously loaded item count value is reloaded. This means that we can set <code>NDTR</code> once, then trigger DMA transfers by starting the ADC conversion process, and the right number of values will be transferred each time.</p><p><strong>5. Enable DMA interrupts</strong></p><p>We want to get DMA interrupts to be notified when a conversion and transfer completes. As usual, we need to enable the relevant interrupts with the NVIC:</p><div class="highlight"><div class="source"><pre><span></span><span class="n">NVIC_SetPriority</span><span class="p">(</span><span class="n">DMA2_Stream0_IRQn</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span> <span class="c1">// DMA IRQ lower priority than ADC IRQ.</span>
+<span class="n">NVIC_EnableIRQ</span><span class="p">(</span><span class="n">DMA2_Stream0_IRQn</span><span class="p">);</span>
+</pre></div></div><p>and to set some peripheral-dependent interrupt enable bits:</p><div class="highlight"><div class="source"><pre><span></span><span class="n">SET_BIT</span><span class="p">(</span><span class="n">DMA2_Stream0</span><span class="o">-&gt;</span><span class="n">CR</span><span class="p">,</span> <span class="n">DMA_SxCR_TCIE</span><span class="p">);</span>
+<span class="n">SET_BIT</span><span class="p">(</span><span class="n">DMA2_Stream0</span><span class="o">-&gt;</span><span class="n">CR</span><span class="p">,</span> <span class="n">DMA_SxCR_TEIE</span><span class="p">);</span>
+</pre></div></div><p>In this case, we enable the “transfer complete” and “transfer error” interrupts. This means that when we get a <code>DMA2_Stream0</code> interrupt, we need to examine some flags in the stream’s interrupt status register to determine the reason for the interrupt:</p><div class="highlight"><div class="source"><pre><span></span><span class="kt">void</span> <span class="nf">DMA2_Stream0_IRQHandler</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// DMA transfer complete.</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">READ_BIT</span><span class="p">(</span><span class="n">DMA2</span><span class="o">-&gt;</span><span class="n">LISR</span><span class="p">,</span> <span class="n">DMA_LISR_TCIF0</span><span class="p">))</span> <span class="p">{</span>
+    <span class="n">WRITE_REG</span><span class="p">(</span><span class="n">DMA2</span><span class="o">-&gt;</span><span class="n">LIFCR</span> <span class="p">,</span> <span class="n">DMA_LIFCR_CTCIF0</span><span class="p">);</span>
+    <span class="n">dma_complete</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="c1">// DMA transfer error.</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">READ_BIT</span><span class="p">(</span><span class="n">DMA2</span><span class="o">-&gt;</span><span class="n">LISR</span> <span class="p">,</span><span class="n">DMA_LISR_TEIF0</span><span class="p">))</span> <span class="p">{</span>
+    <span class="n">WRITE_REG</span><span class="p">(</span><span class="n">DMA2</span><span class="o">-&gt;</span><span class="n">LIFCR</span> <span class="p">,</span> <span class="n">DMA_LIFCR_CTEIF0</span><span class="p">);</span>
+    <span class="n">dma_error</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div></div><p><strong>6. Enable DMA transfer</strong></p><p>Finally, we need to actually enable the DMA stream, which we do by setting the <code>EN</code> bit in the stream’s <code>CR</code> configuration register:</p><div class="highlight"><div class="source"><pre><span></span><span class="n">SET_BIT</span><span class="p">(</span><span class="n">DMA2_Stream0</span><span class="o">-&gt;</span><span class="n">CR</span><span class="p">,</span> <span class="n">DMA_SxCR_EN</span><span class="p">);</span>
+</pre></div></div><h3>Triggering ADC with DMA</h3><p>Before we trigger an ADC conversion by setting the <code>SWSTART</code> bit in the ADC’s <code>CR2</code> register (just as we did for the polled ADC case), we need to enable the connection between the ADC and the DMA controller on the ADC end. We do this by clearing and then immediately setting the <code>DMA</code> bit in the ADC’s <code>CR2</code> register:</p><div class="highlight"><div class="source"><pre><span></span><span class="n">CLEAR_BIT</span><span class="p">(</span><span class="n">ADC1</span><span class="o">-&gt;</span><span class="n">CR2</span><span class="p">,</span> <span class="n">ADC_CR2_DMA</span><span class="p">);</span>
+<span class="n">SET_BIT</span><span class="p">(</span><span class="n">ADC1</span><span class="o">-&gt;</span><span class="n">CR2</span><span class="p">,</span> <span class="n">ADC_CR2_DMA</span><span class="p">);</span>
+</pre></div></div><p>Setting the <code>DMA</code> bit causes a DMA transfer to be triggered after each ADC conversion. Clearing the <code>DMA</code> bit before setting it is needed to reset the ADC-DMA link in between rounds of conversion. Working out what’s going on here requires some careful reading of the STM32F767 reference manual. Section 15.8.1 (<em>Using the DMA</em>) in the ADC chapter of the manual includes the following description:</p><p><a href="./sky blue trades _ STM32 Timer + ADC + DMA_ Part 2_files/rm-adc-dma-end.png" target="_blank"><img alt="DMA end of transfer" src="./sky blue trades _ STM32 Timer + ADC + DMA_ Part 2_files/rm-adc-dma-end.png"></a></p><p>The important part here is “However the <code>DMA</code> bit is not cleared by hardware. It must be written to 0, then to 1 to start a new transfer.” That’s what we’re doing here. We don’t want to set the <code>DDS</code> bit, because we want DMA transfers to stop once we’ve transferred the number of items that we configure, and we’re not using any double-buffering.</p><p>Once we reset the <code>DMA</code> bit in the <code>ADC1-&gt;CR2</code> register like this, we set the <code>SWSTART</code> bit:</p><div class="highlight"><div class="source"><pre><span></span><span class="n">SET_BIT</span><span class="p">(</span><span class="n">ADC1</span><span class="o">-&gt;</span><span class="n">CR2</span><span class="p">,</span> <span class="n">ADC_CR2_SWSTART</span><span class="p">);</span>
+</pre></div></div><p>and the ADC conversion starts, just as in the polled case. However, in this case, we <em>do not</em> wait for the ADC to mark that the conversion has been completed by polling on the <code>EOC</code> bit in the <code>ADC1-&gt;SR</code> status register. Instead we go straight back to the main loop of our program.</p><p>When the ADC conversion is complete, the ADC tells the DMA controller to start a transfer, and the way that we’ve configured the DMA controller causes the contents of the ADC’s conversion data register <code>ADC1-&gt;DR</code> to be transferred to the buffer we set up. Since we configured stream 0 on <code>DMA2</code> to transfer only a single item, as soon as the single conversion result is transferred, the DMA controller raises a <code>DMA2_Stream0</code> “transfer complete” interrupt. We use this to indicate that the ADC conversion is complete and the conversion result is available in our buffer.</p><p>(As for the all the examples here, the main program for <code>ex2.c</code> is just a super-loop that uses flags set by interrupt service routines to respond to external events. For example, there is a <code>dma_complete</code> flag that’s set in the <code>DMA2_Stream0</code> ISR that’s used to trigger printing of the ADC conversion results.)</p><h2>Example 3: DMA ADC for multiple inputs</h2><p>Using DMA to transfer a single value isn’t very exciting, so <a href="https://github.com/ian-ross/stm32-timer-adc-dma/blob/main/ex3.c">example <code>ex3.c</code></a> uses the same approach to convert four analog inputs one after another. The DMA controller transfers the ADC conversion results to a buffer and generates an interrupt once all four conversions are done. The main program can then retrieve the converted data from the buffer.</p><p>There are relatively few configuration differences compared to the last example to make this work.</p><h3>ADC configuration</h3><p>First we need to ensure that GPIO pins we want to use are configured as analog inputs. This is done in the common configuration code.</p><p>We then need to configure the ADC to do multiple conversions. First we need to set the number of input signals we need to convert in the <code>L</code> length field of the ADC’s <code>SQR1</code> register:</p><div class="highlight"><div class="source"><pre><span></span><span class="n">MODIFY_REG</span><span class="p">(</span><span class="n">ADC1</span><span class="o">-&gt;</span><span class="n">SQR1</span><span class="p">,</span> <span class="n">ADC_SQR1_L</span><span class="p">,</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">ADC_SQR1_L_Pos</span><span class="p">);</span>
+</pre></div></div><p>The values in the <code>L</code> field are <em>one less than</em> the number of inputs we want to convert: we set this field to zero to do a single conversion, and to do four conversions we set <code>L=3</code>.</p><p>We then need to let the ADC know <em>which</em> inputs to convert. We do this by writing channel indexes (from 4 to 7, which are the ADC channels that are connected to the GPIOs that we’re using) into the <code>SQn</code> fields of the ADC’s <code>SQR1</code>, <code>SQR2</code>, and <code>SQR3</code> registers. Remember that these sequence registers are arranged <em>backwards</em>, i.e. the first input to be converted goes in the last (least significant bits) position in <code>SQR3</code>, the second channel goes in the next higher bit position field, and so on, moving back to <code>SQR2</code> and <code>SQR1</code> for the later fields. We have four fields, and the channel indexes for those all fit into <code>SQR3</code>, so we do:</p><div class="highlight"><div class="source"><pre><span></span><span class="n">MODIFY_REG</span><span class="p">(</span><span class="n">ADC1</span><span class="o">-&gt;</span><span class="n">SQR3</span><span class="p">,</span> <span class="n">ADC_SQR3_SQ1</span><span class="p">,</span> <span class="mh">0x04</span> <span class="o">&lt;&lt;</span> <span class="n">ADC_SQR3_SQ1_Pos</span><span class="p">);</span>
+<span class="n">MODIFY_REG</span><span class="p">(</span><span class="n">ADC1</span><span class="o">-&gt;</span><span class="n">SQR3</span><span class="p">,</span> <span class="n">ADC_SQR3_SQ2</span><span class="p">,</span> <span class="mh">0x05</span> <span class="o">&lt;&lt;</span> <span class="n">ADC_SQR3_SQ2_Pos</span><span class="p">);</span>
+<span class="n">MODIFY_REG</span><span class="p">(</span><span class="n">ADC1</span><span class="o">-&gt;</span><span class="n">SQR3</span><span class="p">,</span> <span class="n">ADC_SQR3_SQ3</span><span class="p">,</span> <span class="mh">0x06</span> <span class="o">&lt;&lt;</span> <span class="n">ADC_SQR3_SQ3_Pos</span><span class="p">);</span>
+<span class="n">MODIFY_REG</span><span class="p">(</span><span class="n">ADC1</span><span class="o">-&gt;</span><span class="n">SQR3</span><span class="p">,</span> <span class="n">ADC_SQR3_SQ4</span><span class="p">,</span> <span class="mh">0x07</span> <span class="o">&lt;&lt;</span> <span class="n">ADC_SQR3_SQ4_Pos</span><span class="p">);</span>
+</pre></div></div><p>We then need to set sample times for each of the channels we’re using:</p><div class="highlight"><div class="source"><pre><span></span><span class="n">MODIFY_REG</span><span class="p">(</span><span class="n">ADC1</span><span class="o">-&gt;</span><span class="n">SMPR2</span><span class="p">,</span> <span class="n">ADC_SMPR2_SMP4</span><span class="p">,</span> <span class="mh">0x03</span> <span class="o">&lt;&lt;</span> <span class="n">ADC_SMPR2_SMP4_Pos</span><span class="p">);</span>
+<span class="n">MODIFY_REG</span><span class="p">(</span><span class="n">ADC1</span><span class="o">-&gt;</span><span class="n">SMPR2</span><span class="p">,</span> <span class="n">ADC_SMPR2_SMP5</span><span class="p">,</span> <span class="mh">0x03</span> <span class="o">&lt;&lt;</span> <span class="n">ADC_SMPR2_SMP5_Pos</span><span class="p">);</span>
+<span class="n">MODIFY_REG</span><span class="p">(</span><span class="n">ADC1</span><span class="o">-&gt;</span><span class="n">SMPR2</span><span class="p">,</span> <span class="n">ADC_SMPR2_SMP6</span><span class="p">,</span> <span class="mh">0x03</span> <span class="o">&lt;&lt;</span> <span class="n">ADC_SMPR2_SMP6_Pos</span><span class="p">);</span>
+<span class="n">MODIFY_REG</span><span class="p">(</span><span class="n">ADC1</span><span class="o">-&gt;</span><span class="n">SMPR2</span><span class="p">,</span> <span class="n">ADC_SMPR2_SMP7</span><span class="p">,</span> <span class="mh">0x03</span> <span class="o">&lt;&lt;</span> <span class="n">ADC_SMPR2_SMP7_Pos</span><span class="p">);</span>
+</pre></div></div><p>Finally, we need to enable <em>scan mode</em>. This is the mode that makes use of the <code>SQR1</code>, <code>SQR2</code> and <code>SQR3</code> registers to decide which channels to convert:</p><div class="highlight"><div class="source"><pre><span></span><span class="n">SET_BIT</span><span class="p">(</span><span class="n">ADC1</span><span class="o">-&gt;</span><span class="n">CR1</span><span class="p">,</span> <span class="n">ADC_CR1_SCAN</span><span class="p">);</span>
+</pre></div></div><h3>DMA configuration</h3><p>The only change to the DMA configuration here compared to <code>ex2.c</code> is that we need to define a larger buffer to store the converted samples:</p><div class="highlight"><div class="source"><pre><span></span><span class="cp">#define NCHANNELS 4</span>
+<span class="k">static</span> <span class="k">volatile</span> <span class="kt">uint16_t</span> <span class="n">dma_adc_sample</span><span class="p">[</span><span class="n">NCHANNELS</span><span class="p">];</span>
+</pre></div></div><p>we need to set the DMA destination memory address correctly:</p><div class="highlight"><div class="source"><pre><span></span><span class="n">WRITE_REG</span><span class="p">(</span><span class="n">DMA2_Stream0</span><span class="o">-&gt;</span><span class="n">M0AR</span><span class="p">,</span> <span class="p">(</span><span class="kt">uint32_t</span><span class="p">)</span><span class="o">&amp;</span><span class="n">dma_adc_sample</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+</pre></div></div><p>and we need to set the DMA transfer size to the number of items we want to convert:</p><div class="highlight"><div class="source"><pre><span></span><span class="n">MODIFY_REG</span><span class="p">(</span><span class="n">DMA2_Stream0</span><span class="o">-&gt;</span><span class="n">NDTR</span><span class="p">,</span> <span class="n">DMA_SxNDT</span><span class="p">,</span> <span class="n">NCHANNELS</span><span class="p">);</span>
+</pre></div></div><h3>Triggering ADC with DMA</h3><p>We start an ADC conversion exactly as for the previous example, resetting the ADC’s <code>DMA</code> flag, then setting the <code>SWSTART</code> bit in the <code>ADC1-&gt;CR2</code> register:</p><div class="highlight"><div class="source"><pre><span></span><span class="n">CLEAR_BIT</span><span class="p">(</span><span class="n">ADC1</span><span class="o">-&gt;</span><span class="n">CR2</span><span class="p">,</span> <span class="n">ADC_CR2_DMA</span><span class="p">);</span>
+<span class="n">SET_BIT</span><span class="p">(</span><span class="n">ADC1</span><span class="o">-&gt;</span><span class="n">CR2</span><span class="p">,</span> <span class="n">ADC_CR2_DMA</span><span class="p">);</span>
+
+<span class="n">SET_BIT</span><span class="p">(</span><span class="n">ADC1</span><span class="o">-&gt;</span><span class="n">CR2</span><span class="p">,</span> <span class="n">ADC_CR2_SWSTART</span><span class="p">);</span>
+</pre></div></div><p>When we do this, four ADC conversions are performed one after another on the four analog inputs that we specified, and after each conversion completes, a DMA transfer is triggered to move the conversion result into our buffer. Once all four conversion results have been transferred, the DMA controller raises a “transfer complete” interrupt. In the interrupt handler for the DMA interrupt, we set a <code>dma_complete</code> flag, and use this in the main program super-loop to detect when there is new data available in the buffer.</p><h2>Conclusions</h2><p>The biggest obstacle to making DMA work is just wading through the documentation for all the options supported by the STM32F767’s DMA controllers. Once you settle on one specific setup, and get some understanding of the assignment of DMA <em>channels</em> (DMA controller to peripheral connections) to DMA <em>streams</em> (distinct DMA processing engines within the DMA controllers that can serve as interrupt sources), it’s not too hard to get things going.</p><p>In the <a href="https://skybluetrades.net/blog/2020/11/2020-11-26-stm32-timer-adc-dma-3">next article</a>, we’ll tie all this up by changing from triggering ADC conversions from software (using the <code>SWSTART</code> bit in the <code>ADC1-&gt;CR2</code> register) to triggering them with a timer. As a reward for getting through all this rather dry material, we’ll also write a (tiny and useless) USB oscilloscope application!</p>
+
+
+    </section>
+    <hr>
+    <footer>
+      <div>Copyright 2011-2021 Ian Ross</div>
+      <div>This work is licensed under <a href="http://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer">CC BY-SA 4.0<img src="./sky blue trades _ STM32 Timer + ADC + DMA_ Part 2_files/cc.svg"><img src="./sky blue trades _ STM32 Timer + ADC + DMA_ Part 2_files/by.svg"><img src="./sky blue trades _ STM32 Timer + ADC + DMA_ Part 2_files/sa.svg"></a></div>
+    </footer>
+  </article>
+  <script>
+    window.MathJax = { tex: { inlineMath: [['$','$']] } };
+  </script>
+  <script id="MathJax-script" async="" src="./sky blue trades _ STM32 Timer + ADC + DMA_ Part 2_files/tex-mml-chtml.js"></script>
+
+
+
+
+
+</body></html>

@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<!-- saved from url=(0072)https://skybluetrades.net/blog/2020/11/2020-11-24-stm32-timer-adc-dma-1/ -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <title>sky blue trades  | STM32 Timer + ADC + DMA: Part 1</title>
+  <link rel="stylesheet" href="./sky blue trades _ STM32 Timer + ADC + DMA_ Part 1_files/style.css">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="./sky blue trades _ STM32 Timer + ADC + DMA_ Part 1_files/polyfill.min.js"></script>
+
+
+<style type="text/css">.CtxtMenu_InfoClose {  top:.2em; right:.2em;}
+.CtxtMenu_InfoContent {  overflow:auto; text-align:left; font-size:80%;  padding:.4em .6em; border:1px inset; margin:1em 0px;  max-height:20em; max-width:30em; background-color:#EEEEEE;  white-space:normal;}
+.CtxtMenu_Info.CtxtMenu_MousePost {outline:none;}
+.CtxtMenu_Info {  position:fixed; left:50%; width:auto; text-align:center;  border:3px outset; padding:1em 2em; background-color:#DDDDDD;  color:black;  cursor:default; font-family:message-box; font-size:120%;  font-style:normal; text-indent:0; text-transform:none;  line-height:normal; letter-spacing:normal; word-spacing:normal;  word-wrap:normal; white-space:nowrap; float:none; z-index:201;  border-radius: 15px;                     /* Opera 10.5 and IE9 */  -webkit-border-radius:15px;               /* Safari and Chrome */  -moz-border-radius:15px;                  /* Firefox */  -khtml-border-radius:15px;                /* Konqueror */  box-shadow:0px 10px 20px #808080;         /* Opera 10.5 and IE9 */  -webkit-box-shadow:0px 10px 20px #808080; /* Safari 3 & Chrome */  -moz-box-shadow:0px 10px 20px #808080;    /* Forefox 3.5 */  -khtml-box-shadow:0px 10px 20px #808080;  /* Konqueror */  filter:progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color="gray", Positive="true"); /* IE */}
+</style><style type="text/css">.CtxtMenu_MenuClose {  position:absolute;  cursor:pointer;  display:inline-block;  border:2px solid #AAA;  border-radius:18px;  -webkit-border-radius: 18px;             /* Safari and Chrome */  -moz-border-radius: 18px;                /* Firefox */  -khtml-border-radius: 18px;              /* Konqueror */  font-family: "Courier New", Courier;  font-size:24px;  color:#F0F0F0}
+.CtxtMenu_MenuClose span {  display:block; background-color:#AAA; border:1.5px solid;  border-radius:18px;  -webkit-border-radius: 18px;             /* Safari and Chrome */  -moz-border-radius: 18px;                /* Firefox */  -khtml-border-radius: 18px;              /* Konqueror */  line-height:0;  padding:8px 0 6px     /* may need to be browser-specific */}
+.CtxtMenu_MenuClose:hover {  color:white!important;  border:2px solid #CCC!important}
+.CtxtMenu_MenuClose:hover span {  background-color:#CCC!important}
+.CtxtMenu_MenuClose:hover:focus {  outline:none}
+</style><style type="text/css">.CtxtMenu_Menu {  position:absolute;  background-color:white;  color:black;  width:auto; padding:5px 0px;  border:1px solid #CCCCCC; margin:0; cursor:default;  font: menu; text-align:left; text-indent:0; text-transform:none;  line-height:normal; letter-spacing:normal; word-spacing:normal;  word-wrap:normal; white-space:nowrap; float:none; z-index:201;  border-radius: 5px;                     /* Opera 10.5 and IE9 */  -webkit-border-radius: 5px;             /* Safari and Chrome */  -moz-border-radius: 5px;                /* Firefox */  -khtml-border-radius: 5px;              /* Konqueror */  box-shadow:0px 10px 20px #808080;         /* Opera 10.5 and IE9 */  -webkit-box-shadow:0px 10px 20px #808080; /* Safari 3 & Chrome */  -moz-box-shadow:0px 10px 20px #808080;    /* Forefox 3.5 */  -khtml-box-shadow:0px 10px 20px #808080;  /* Konqueror */}
+.CtxtMenu_MenuItem {  padding: 1px 2em;  background:transparent;}
+.CtxtMenu_MenuArrow {  position:absolute; right:.5em; padding-top:.25em; color:#666666;  font-family: null; font-size: .75em}
+.CtxtMenu_MenuActive .CtxtMenu_MenuArrow {color:white}
+.CtxtMenu_MenuArrow.CtxtMenu_RTL {left:.5em; right:auto}
+.CtxtMenu_MenuCheck {  position:absolute; left:.7em;  font-family: null}
+.CtxtMenu_MenuCheck.CtxtMenu_RTL { right:.7em; left:auto }
+.CtxtMenu_MenuRadioCheck {  position:absolute; left: .7em;}
+.CtxtMenu_MenuRadioCheck.CtxtMenu_RTL {  right: .7em; left:auto}
+.CtxtMenu_MenuInputBox {  padding-left: 1em; right:.5em; color:#666666;  font-family: null;}
+.CtxtMenu_MenuInputBox.CtxtMenu_RTL {  left: .1em;}
+.CtxtMenu_MenuComboBox {  left:.1em; padding-bottom:.5em;}
+.CtxtMenu_MenuSlider {  left: .1em;}
+.CtxtMenu_SliderValue {  position:absolute; right:.1em; padding-top:.25em; color:#333333;  font-size: .75em}
+.CtxtMenu_SliderBar {  outline: none; background: #d3d3d3}
+.CtxtMenu_MenuLabel {  padding: 1px 2em 3px 1.33em;  font-style:italic}
+.CtxtMenu_MenuRule {  border-top: 1px solid #DDDDDD;  margin: 4px 3px;}
+.CtxtMenu_MenuDisabled {  color:GrayText}
+.CtxtMenu_MenuActive {  background-color: #606872;  color: white;}
+.CtxtMenu_MenuDisabled:focus {  background-color: #E8E8E8}
+.CtxtMenu_MenuLabel:focus {  background-color: #E8E8E8}
+.CtxtMenu_ContextMenu:focus {  outline:none}
+.CtxtMenu_ContextMenu .CtxtMenu_MenuItem:focus {  outline:none}
+.CtxtMenu_SelectionMenu {  position:relative; float:left;  border-bottom: none; -webkit-box-shadow:none; -webkit-border-radius:0px; }
+.CtxtMenu_SelectionItem {  padding-right: 1em;}
+.CtxtMenu_Selection {  right: 40%; width:50%; }
+.CtxtMenu_SelectionBox {  padding: 0em; max-height:20em; max-width: none;  background-color:#FFFFFF;}
+.CtxtMenu_SelectionDivider {  clear: both; border-top: 2px solid #000000;}
+.CtxtMenu_Menu .CtxtMenu_MenuClose {  top:-10px; left:-10px}
+</style><style id="MJX-CHTML-styles">
+mjx-container[jax="CHTML"] {
+  line-height: 0;
+}
+
+mjx-container [space="1"] {
+  margin-left: .111em;
+}
+
+mjx-container [space="2"] {
+  margin-left: .167em;
+}
+
+mjx-container [space="3"] {
+  margin-left: .222em;
+}
+
+mjx-container [space="4"] {
+  margin-left: .278em;
+}
+
+mjx-container [space="5"] {
+  margin-left: .333em;
+}
+
+mjx-container [rspace="1"] {
+  margin-right: .111em;
+}
+
+mjx-container [rspace="2"] {
+  margin-right: .167em;
+}
+
+mjx-container [rspace="3"] {
+  margin-right: .222em;
+}
+
+mjx-container [rspace="4"] {
+  margin-right: .278em;
+}
+
+mjx-container [rspace="5"] {
+  margin-right: .333em;
+}
+
+mjx-container [size="s"] {
+  font-size: 70.7%;
+}
+
+mjx-container [size="ss"] {
+  font-size: 50%;
+}
+
+mjx-container [size="Tn"] {
+  font-size: 60%;
+}
+
+mjx-container [size="sm"] {
+  font-size: 85%;
+}
+
+mjx-container [size="lg"] {
+  font-size: 120%;
+}
+
+mjx-container [size="Lg"] {
+  font-size: 144%;
+}
+
+mjx-container [size="LG"] {
+  font-size: 173%;
+}
+
+mjx-container [size="hg"] {
+  font-size: 207%;
+}
+
+mjx-container [size="HG"] {
+  font-size: 249%;
+}
+
+mjx-container [width="full"] {
+  width: 100%;
+}
+
+mjx-box {
+  display: inline-block;
+}
+
+mjx-block {
+  display: block;
+}
+
+mjx-itable {
+  display: inline-table;
+}
+
+mjx-row {
+  display: table-row;
+}
+
+mjx-row > * {
+  display: table-cell;
+}
+
+mjx-mtext {
+  display: inline-block;
+}
+
+mjx-mstyle {
+  display: inline-block;
+}
+
+mjx-merror {
+  display: inline-block;
+  color: red;
+  background-color: yellow;
+}
+
+mjx-mphantom {
+  visibility: hidden;
+}
+
+_::-webkit-full-page-media, _:future, :root mjx-container {
+  will-change: opacity;
+}
+
+mjx-assistive-mml {
+  position: absolute !important;
+  top: 0px;
+  left: 0px;
+  clip: rect(1px, 1px, 1px, 1px);
+  padding: 1px 0px 0px 0px !important;
+  border: 0px !important;
+  display: block !important;
+  width: auto !important;
+  overflow: hidden !important;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+mjx-assistive-mml[display="block"] {
+  width: 100% !important;
+}
+
+mjx-c::before {
+  display: block;
+  width: 0;
+}
+
+.MJX-TEX {
+  font-family: MJXZERO, MJXTEX;
+}
+
+.TEX-B {
+  font-family: MJXZERO, MJXTEX-B;
+}
+
+.TEX-I {
+  font-family: MJXZERO, MJXTEX-I;
+}
+
+.TEX-MI {
+  font-family: MJXZERO, MJXTEX-MI;
+}
+
+.TEX-BI {
+  font-family: MJXZERO, MJXTEX-BI;
+}
+
+.TEX-S1 {
+  font-family: MJXZERO, MJXTEX-S1;
+}
+
+.TEX-S2 {
+  font-family: MJXZERO, MJXTEX-S2;
+}
+
+.TEX-S3 {
+  font-family: MJXZERO, MJXTEX-S3;
+}
+
+.TEX-S4 {
+  font-family: MJXZERO, MJXTEX-S4;
+}
+
+.TEX-A {
+  font-family: MJXZERO, MJXTEX-A;
+}
+
+.TEX-C {
+  font-family: MJXZERO, MJXTEX-C;
+}
+
+.TEX-CB {
+  font-family: MJXZERO, MJXTEX-CB;
+}
+
+.TEX-FR {
+  font-family: MJXZERO, MJXTEX-FR;
+}
+
+.TEX-FRB {
+  font-family: MJXZERO, MJXTEX-FRB;
+}
+
+.TEX-SS {
+  font-family: MJXZERO, MJXTEX-SS;
+}
+
+.TEX-SSB {
+  font-family: MJXZERO, MJXTEX-SSB;
+}
+
+.TEX-SSI {
+  font-family: MJXZERO, MJXTEX-SSI;
+}
+
+.TEX-SC {
+  font-family: MJXZERO, MJXTEX-SC;
+}
+
+.TEX-T {
+  font-family: MJXZERO, MJXTEX-T;
+}
+
+.TEX-V {
+  font-family: MJXZERO, MJXTEX-V;
+}
+
+.TEX-VB {
+  font-family: MJXZERO, MJXTEX-VB;
+}
+
+mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
+  font-family: MJXZERO, MJXTEX-S1, MJXTEX-S4, MJXTEX, MJXTEX-A ! important;
+}
+
+@font-face /* 0 */ {
+  font-family: MJXZERO;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Zero.woff") format("woff");
+}
+
+@font-face /* 1 */ {
+  font-family: MJXTEX;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Main-Regular.woff") format("woff");
+}
+
+@font-face /* 2 */ {
+  font-family: MJXTEX-B;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Main-Bold.woff") format("woff");
+}
+
+@font-face /* 3 */ {
+  font-family: MJXTEX-I;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Math-Italic.woff") format("woff");
+}
+
+@font-face /* 4 */ {
+  font-family: MJXTEX-MI;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Main-Italic.woff") format("woff");
+}
+
+@font-face /* 5 */ {
+  font-family: MJXTEX-BI;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Math-BoldItalic.woff") format("woff");
+}
+
+@font-face /* 6 */ {
+  font-family: MJXTEX-S1;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Size1-Regular.woff") format("woff");
+}
+
+@font-face /* 7 */ {
+  font-family: MJXTEX-S2;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Size2-Regular.woff") format("woff");
+}
+
+@font-face /* 8 */ {
+  font-family: MJXTEX-S3;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Size3-Regular.woff") format("woff");
+}
+
+@font-face /* 9 */ {
+  font-family: MJXTEX-S4;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Size4-Regular.woff") format("woff");
+}
+
+@font-face /* 10 */ {
+  font-family: MJXTEX-A;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_AMS-Regular.woff") format("woff");
+}
+
+@font-face /* 11 */ {
+  font-family: MJXTEX-C;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Calligraphic-Regular.woff") format("woff");
+}
+
+@font-face /* 12 */ {
+  font-family: MJXTEX-CB;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Calligraphic-Bold.woff") format("woff");
+}
+
+@font-face /* 13 */ {
+  font-family: MJXTEX-FR;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Fraktur-Regular.woff") format("woff");
+}
+
+@font-face /* 14 */ {
+  font-family: MJXTEX-FRB;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Fraktur-Bold.woff") format("woff");
+}
+
+@font-face /* 15 */ {
+  font-family: MJXTEX-SS;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_SansSerif-Regular.woff") format("woff");
+}
+
+@font-face /* 16 */ {
+  font-family: MJXTEX-SSB;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_SansSerif-Bold.woff") format("woff");
+}
+
+@font-face /* 17 */ {
+  font-family: MJXTEX-SSI;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_SansSerif-Italic.woff") format("woff");
+}
+
+@font-face /* 18 */ {
+  font-family: MJXTEX-SC;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Script-Regular.woff") format("woff");
+}
+
+@font-face /* 19 */ {
+  font-family: MJXTEX-T;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Typewriter-Regular.woff") format("woff");
+}
+
+@font-face /* 20 */ {
+  font-family: MJXTEX-V;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Vector-Regular.woff") format("woff");
+}
+
+@font-face /* 21 */ {
+  font-family: MJXTEX-VB;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Vector-Bold.woff") format("woff");
+}
+</style></head>
+<body>
+  <header class="site-header" id="site-header">
+    <nav>
+      <div class="header-section">
+        <div class="logo"><a href="https://skybluetrades.net/">sky blue trades</a></div>
+        <label id="menu-label" for="menu-toggle">
+          <svg viewBox="0 0 100 80" width="40" height="40">
+            <rect y="10" width="100" height="15"></rect>
+            <rect y="40" width="100" height="15"></rect>
+            <rect y="70" width="100" height="15"></rect>
+          </svg>
+        </label>
+        <input type="checkbox" id="menu-toggle">
+        <ul class="menu-items">
+          <li><a href="https://skybluetrades.net/projects/">Projects</a></li>
+          <li><a href="https://skybluetrades.net/tutorials">Tutorials</a></li>
+          <li><a href="https://skybluetrades.net/blog">Blog</a></li>
+          <li><a href="https://skybluetrades.net/hire-me.html">Hire me!</a></li>
+          <li class="top-header"><a href="https://skybluetrades.net/search.html"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg> Search</a></li>
+          <li class="top-header"><a href="https://skybluetrades.net/feed.xml"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg> RSS feed</a></li>
+      </ul></div>
+        
+      
+      <div class="right-header">
+        <a href="https://skybluetrades.net/search.html"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></a>
+        <a href="https://skybluetrades.net/feed.xml"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a>
+      </div>
+    </nav>
+  </header>
+  <article class="maincontent">
+
+    <h1>STM32 Timer + ADC + DMA: Part 1</h1>
+    <div class="title-info"><span class="title-date">24 Nov 2020</span><span class="category"><a href="https://skybluetrades.net/blog/category/embedded.html">embedded</a></span><span class="category"><a href="https://skybluetrades.net/blog/category/stm32.html">stm32</a></span></div>
+    <section>
+      <p>I’ve been doing some STM32 programming recently as part of my <a href="https://skybluetrades.net/projects/mini-mapper/">Mini-Mapper project</a> (using an STM32F767ZI). I needed to collect samples from several analog inputs at a fixed frequency, for monitoring motor torque. A simple thing to do, right? But the obvious way to do it isn’t necessarily the best.</p><p>In this series of three articles, I’m going to try to show a better way. Some of this will be quite boring (it’s just configuring microcontroller peripherals, after all), so I allowed myself a bit of time for a fun “finisher” at the end.</p><p>There’s a <a href="https://youtu.be/GisdV5D7A8o">video demonstrating each of the examples</a> covered in this series of articles. It’s probably most useful to watch it in conjunction with reading the articles.</p><h2>ADC sampling approaches</h2><p>Simplest idea: check elapsed time in your main loop, and when enough time has gone by, loop over the ADC inputs you want to sample, start an ADC conversion for each one, wait until it’s done, then go on to the next one. There are two problems with that: first, there will probably be some jitter in your sample timing because of whatever else is happening in your main loop; second, you’re using CPU cycles waiting for the ADC, cycles that could be spent on application code instead.</p><p>Like many ARM devices, STM32 chips have peripheral interconnects that allow you to “wire up” peripherals to run autonomously. (Here’s an <a href="https://www.st.com/content/ccc/resource/technical/document/application_note/80/ad/d7/4b/34/46/47/e8/DM00173083.pdf/files/DM00173083.pdf/jcr:content/translations/en.DM00173083.pdf">application note</a> that describes this for the STM32F7 series.) In our case, we want a timer to trigger an ADC, the ADC to do conversions for a number of inputs, and for the conversion results to end up somewhere we can get at them. Ideally we get a single interrupt when each series of conversions is complete.</p><p>That should be routine, but it’s not completely obvious how to make it all work together. From what I’ve seen from Stack Overflow questions and in other places, it’s confusing for a lot of people. So I’m going to show one way to set this up. We’ll be using a timer, an ADC and a DMA (direct memory access) controller together to make this work.</p><p>We’ll end up with a solution that samples our analog inputs with less jitter and that only interrupts our code when a full set of samples is available. This approach also represents a form of encapsulation— once this timer+ADC+DMA system is working, you can treat it as an autonomous sub-system in your microcontroller and more or less forget about the details of what it’s doing.</p><h2>Steps, hardware and software approach</h2><p>There are three articles in this series:</p><ol><li><p>In <a href="https://skybluetrades.net/stm32-timer-adc-dma-1">this article</a>, we’ll look at basic MCU setup shared among all the examples we’ll use, and we’ll see how to set up the STM32F767’s ADC to collect a single sample in “polled mode”.</p></li><li><p>In the <a href="https://skybluetrades.net/stm32-timer-adc-dma-2">second article</a>, we’ll get the ADC to talk to a DMA controller so that we can collect a series of samples into a buffer.</p></li><li><p>In the <a href="https://skybluetrades.net/stm32-timer-adc-dma-3">third article</a>, we’ll link the ADC to a timer to get regular samples. We’ll demonstrate how to use this with a very simple USB oscilloscope example.</p></li></ol><p>All of the examples run on a Nucleo-144 development board with an STM32F767ZI MCU. The code for the examples is in one <a href="https://github.com/ian-ross/stm32-timer-adc-dma">GitHub repository</a>. It’s set up to build using just makefiles and GCC. The makefile has a <code>GCC_INSTALL_ROOT</code> variable that points to the location of the <code>arm-none-eabi</code> GCC toolchain. Running <code>make</code> will build all the examples in the <code>build</code> directory. I use OpenOCD to flash these to the Nucleo board.</p><p>We’re not going to use any libraries for these examples: we’ll be writing to the STM32F767’s registers directly to configure peripherals. The registers are all defined in the CMSIS header files for the part. It’s more common to use the ST Micro hardware abstraction layer (HAL) libraries for these kinds of examples. You can get things going very quickly with the HAL if you know what you’re doing, but using the HAL obscures some of the details of the peripheral setup. So, we’ll embrace the registers! (Even if you end up using the HAL later on, it’s a good idea to do some examples in this way to start with, because it gives you a better understanding of the peripherals you’re using.)</p><h2>Example overview</h2><p>It’s easy to get lost in details as we start to configure the MCU and its peripherals, so let me state briefly exactly what this first example we’re going to look at does. We’re going to start by looking at the <a href="https://github.com/ian-ross/stm32-timer-adc-dma/blob/main/ex1.c"><code>ex1.c</code> file</a>.</p><p>This example uses <em>polling</em> to perform ADC conversions. This means that we manually start the ADC conversion process, then we wait for the conversion to complete, checking a flag in the ADC in a busy loop to see when the conversion is done.</p><p>This approach is simple to use, and we only need to configure the ADC (i.e. no DMA, no timers), but it’s neither flexible nor efficient, so we’ll move on to better ways of doing things later. The main reason for looking at this approach first is that it allows us to look at the common MCU initialisation code, and to see some of the main ADC configuration features.</p><h2>Common initialisation: <code>common_init</code></h2><p>Like all of the examples we’re going to look at, <code>ex1.c</code> starts by calling <a href="https://github.com/ian-ross/stm32-timer-adc-dma/blob/main/common.c#L13-L24"><code>common_init</code></a>, a function defined in <a href="https://github.com/ian-ross/stm32-timer-adc-dma/blob/main/common.c"><code>common.c</code></a>. This function does some basic setup of the MCU.</p><p>First, it <a href="https://github.com/ian-ross/stm32-timer-adc-dma/blob/main/common.c#L32-L37">enables instruction and data caches</a>.</p><p>Then, it <a href="https://github.com/ian-ross/stm32-timer-adc-dma/blob/main/common.c#L40-L95">configures the main MCU clock</a> to run at 216 MHz, using the 8 MHz external clock on the Nucleo board as input. Clock setup on these processors is complicated (take a look at the clock tree on page 153 of the <a href="https://www.st.com/resource/en/reference_manual/dm00224583-stm32f76xxx-and-stm32f77xxx-advanced-armbased-32bit-mcus-stmicroelectronics.pdf">STM32F76xxx reference manual</a>...), so don’t worry about the details for now.</p><p>After configuring the system clock, it uses the <code>SysTick_Config</code> function from the CMSIS headers to <a href="https://github.com/ian-ross/stm32-timer-adc-dma/blob/main/common.c#L21">set the ARM SysTick timer interrupt to run at 1 kHz</a>. A simple tick timer is useful for timing non-critical events in the main loop of your program (switching an LED on for a while, for instance).</p><p>Next, <a href="https://github.com/ian-ross/stm32-timer-adc-dma/blob/main/common.c#L112-L136">GPIOs are initialised</a> for the three LEDs on the Nucleo board, and if it’s being used, for the single user button. If it is being used, the button is set up to generate an interrupt that sets a simple flag we can use in the main loop of our program. (Again, the details of setting up interrupts for external sources like GPIOs are a little complicated, so don’t worry about that.)</p><p>Finally, we <a href="https://github.com/ian-ross/stm32-timer-adc-dma/blob/main/common.c#L194-L241">configure serial debugging output</a> so that we can print messages from our program to see what’s going on. There are a number of ways to do this, but for these examples, we use the USART3 peripheral on the STM32F767, which is connected to the ST-Link debugging hardware on the Nucleo board. Once we have the USART set up, any output we write to it will appear on a virtual serial port on the PC connected to the ST-Link USB port on the Nucleo board.</p><h2>Configure polling ADC</h2><p>After the call to <code>common_init</code>, the <code>ex1.c</code> initialisation code calls a function <a href="https://github.com/ian-ross/stm32-timer-adc-dma/blob/main/ex1.c#L54-L68"><code>configure_polled_adc</code></a> to set up the ADC for what we want to do here. This uses the <a href="https://github.com/ian-ross/stm32-timer-adc-dma/blob/main/common.c#L274-L300"><code>configure_common_adc</code></a> function in <code>common.c</code> to do some setup that we need for all the examples. We then move on to the configuration we need for the polled ADC method we’re using in the first example. We’ll walk through each of the six configuration steps:</p><h3>1. GPIO selection and setup</h3><p>First, the <a href="https://github.com/ian-ross/stm32-timer-adc-dma/blob/main/common.c#L276-L281">analog input GPIOs are configured</a>. The pins we set up depend on how many input channels we want. On the Nucleo board, pins PA4, PA5, PA6 and PA7 are available for use with channels 4-7 of ADC1, so we use those.</p><p>Finding out which pins to use requires using a combination of the <a href="https://www.st.com/resource/en/datasheet/stm32f769ni.pdf">datasheet for the STM32F767xx parts</a> and the <a href="https://www.st.com/resource/en/user_manual/dm00244518-stm32-nucleo-144-boards-stmicroelectronics.pdf">manual for the Nucleo board</a>. Important: the pinout information you need is in the <em>datasheet</em> for the STM32 parts, <em>not</em> in the reference manual! The things to look at are:</p><ul><li><p>The first figure in Section 6.13 of the Nucleo manual, which shows the extension connectors on the board. From this you can see which MCU pins are accessible.</p></li><li><p>Table 11 in the datasheet (“STM32F765xx, STM32F767xx, STM32F768Ax and STM32F769xx pin and ball definitions”). This shows the peripheral and other functions that are available on each pin of the MCU.</p></li></ul><p>The most important thing to look at here is the “Additional functions” column of Table 11 in the datasheet. Among other things this lists which ADC channels are connected to which MCU pins. The STM32F767 has three distinct ADCs: ADC1, ADC2 and ADC3. All we need to do is to identify four pins (for four analog inputs) that are assigned to ADC channels on the same ADC and that are accessible on the Nucleo board.</p><p>A bit of back-and-forth between the datasheet and the Nucleo board manual gives us the following assignments:</p><ul><li><p>ADC channel <code>ADC1_CH4</code> on pin PA4</p></li><li><p>ADC channel <code>ADC1_CH5</code> on pin PA5</p></li><li><p>ADC channel <code>ADC1_CH6</code> on pin PA6</p></li><li><p>ADC channel <code>ADC1_CH7</code> on pin PA7</p></li></ul><p>To configure these pins as analog inputs, we use the <code>MODER</code> register for the <code>GPIOA</code> GPIO port (Section 6.4.1 in the reference manual):</p><p><a href="./sky blue trades _ STM32 Timer + ADC + DMA_ Part 1_files/rm-6-4-1.png" target="_blank"><img alt="STM32F767 reference manual Section 6.4.1" src="./sky blue trades _ STM32 Timer + ADC + DMA_ Part 1_files/rm-6-4-1.png"></a></p><p>We need to set the bits corresponding to each pin in the <code>MODER</code> register to 0x03 (the field in the <code>MODER</code> register for each pin is two bits)</p><div class="highlight"><div class="source"><pre><span></span><span class="n">MODIFY_REG</span><span class="p">(</span><span class="n">port</span><span class="o">-&gt;</span><span class="n">MODER</span><span class="p">,</span> <span class="mh">0x03</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="n">pin</span> <span class="o">*</span> <span class="mi">2</span><span class="p">),</span> <span class="mh">0x03</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="n">pin</span> <span class="o">*</span> <span class="mi">2</span><span class="p">));</span>
+</pre></div></div><p>The <code>MODIFY_REG</code> macro is defined in the CMSIS headers, and takes the address of a register, a mask (a binary value with ones in the positions of the register field we want to modify and zeroes everywhere else) and a value. It basically does:</p><div class="highlight"><div class="source"><pre><span></span><span class="n">REG</span> <span class="o">=</span> <span class="p">(</span><span class="n">REG</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">MASK</span><span class="p">)</span> <span class="o">|</span> <span class="n">VALUE</span><span class="p">;</span>
+</pre></div></div><p>which clears out the bits defined by the mask and sets the bits defined by the value. The CMSIS headers define mask and bit position macros for shifting values to make using this convenient.</p><p>On STM32 devices every peripheral is clocked separately, and if a peripheral isn’t clocked, it doesn’t consume any (or much) power. This is nice, but it means that you need to remember to enable the peripheral clock for each peripheral that you use. This is true for GPIO ports, some of the interrupt machinery (used for detecting button presses here), USARTs, ADCs, DMA controllers, more or less everything in fact. (A HAL library can help with this, since it can be written to enable the relevant peripheral clock automatically during peripheral configuration.)</p><blockquote><p>Forgetting to enable peripheral clocks is a common source of bugs in STM32 code!</p></blockquote><p>We need to enable the peripheral clock for the GPIO port we’re using. All the pins we want to use as analog inputs are on GPIO port <code>GPIOA</code>, so we do this:</p><div class="highlight"><div class="source"><pre><span></span><span class="n">RCC</span><span class="o">-&gt;</span><span class="n">AHB1ENR</span> <span class="o">|=</span> <span class="n">RCC_AHB1ENR_GPIOAEN</span><span class="p">;</span>
+</pre></div></div><p><code>RCC</code> is “reset and clock control” and is the part of the MCU that manages all reset and clock distribution. Section 5 of the STM32F767 reference manual covers this in detail. Getting all the clocks going right is one of the hardest parts of getting an STM32 device working. There’s a huge amount of flexibility available, but you obviously pay a price for that in complexity.</p><h3>2. ADC interrupts and clocks</h3><p>If we’re interested in getting interrupts from the ADC, we need to enable them. The STM32F7xx ADC can generate interrupts for end of conversion events and for some error conditions.</p><p>When configuring interrupts on ARM processors you bump up against one slightly weird thing: because some features of ARM MCUs are defined by ARM, and some features are defined by the manufacturer (in our case, ST Micro), some operations are defined in the core ARM definitions (mostly processor core-specific things), while the rest are defined in the manufacturer’s CMSIS definitions. For the STM32F767, the core stuff is defined in a header file called <code>core_cm7.h</code> (for “Cortex-M7”) and the manufacturer stuff is in <code>stm32f767xx.h</code>.</p><p>One thing defined by ARM is the interrupt controller for Cortex-M7 chips, called the <em>Nested Vectored Interrupt Controller</em>, or NVIC, so everything to do with enabling and disabling interrupts, setting interrupt priorities and so on, is defined in <code>core_cm7.h</code>. However, because the peripherals that can <em>generate</em> interrupts depend on the exact device you’re using, all the interrupt numbers (e.g. <code>ADC_IRQn</code>, <code>DMA_Stream0_IRQn</code> and so on) are defined in the manufacturer’s CMSIS header.</p><blockquote><p>It’s useful to have a clear idea of where the split is between ARM core functionality and manufacturer device-specific functionality.</p></blockquote><p>This split can reveal itself in interesting ways. For example, the SysTick timer that’s commonly used for RTOS context switching and general time tracking is an ARM core function, even though it runs off a clock generated by a manufacturer-specific clock system. On the STM32F767, one result of this is that you can’t trigger peripheral actions based on the SysTick timer—you have to use an STM32 timer peripheral. We’ll see how timer event triggering works on the STM32F767 later on.</p><p>If we’re going to use ADC interrupts, <a href="https://github.com/ian-ross/stm32-timer-adc-dma/blob/main/common.c#L283-L287">we enable them and set their priority</a> by doing:</p><div class="highlight"><div class="source"><pre><span></span><span class="n">NVIC_SetPriority</span><span class="p">(</span><span class="n">ADC_IRQn</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+<span class="n">NVIC_EnableIRQ</span><span class="p">(</span><span class="n">ADC_IRQn</span><span class="p">);</span>
+</pre></div></div><p>Those functions with names starting <code>NVIC_...</code> are defined in the <code>core_cm7.h</code> header.</p><p>Just as for the GPIOs, we need to <a href="https://github.com/ian-ross/stm32-timer-adc-dma/blob/main/common.c#L289-L293">enable the peripheral clock for the ADC</a>. Forget to do that, and the ADC just won’t do anything at all. So we do something like this:</p><div class="highlight"><div class="source"><pre><span></span><span class="k">volatile</span> <span class="kt">uint32_t</span> <span class="n">tmpreg</span><span class="p">;</span>
+<span class="n">SET_BIT</span><span class="p">(</span><span class="n">RCC</span><span class="o">-&gt;</span><span class="n">APB2ENR</span><span class="p">,</span> <span class="n">RCC_APB2ENR_ADC1EN</span><span class="p">);</span>
+<span class="n">tmpreg</span> <span class="o">=</span> <span class="n">READ_BIT</span><span class="p">(</span><span class="n">RCC</span><span class="o">-&gt;</span><span class="n">APB2ENR</span><span class="p">,</span> <span class="n">RCC_APB2ENR_ADC1EN</span><span class="p">);</span>
+<span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="n">tmpreg</span><span class="p">;</span>
+</pre></div></div><p>There are two things to notice here. First, there’s a little dance to make sure that the change to the peripheral clock has taken before we do any further configuration on the ADC. That’s what the business with reading the value from the <code>RCC_APB2ENR_ADC1EN</code> bit in the <code>RCC-&gt;APB2ENR</code> register is about here: we declare <code>tmpreg</code> as volatile so that the compiler won’t optimise out this read, and the final line saying <code>(void)tmpreg</code> is there just to prevent the compiler from complaining that we don’t make use of <code>tmpreg</code> after we set it. This is to meet the requirement listed in the reference manual that “Just after enabling the clock for a peripheral, software must wait for a 2 peripheral clock cycles delay before accessing the peripheral registers” (Section 5.2.12).</p><p>The second thing to notice is that, to enable the ADC peripheral clock, we wrote a bit in the <code>RCC-&gt;APB2ENR</code> register, while to enable the GPIOA GPIO port, we wrote a bit in the <code>RCC-&gt;AHB1ENR</code> register. These two peripherals are in different clock domains: one on the <code>APB2</code> peripheral bus, and one on the <code>AHB1</code> bus. It’s worth taking a look through the RCC registers to see which peripherals are on which buses, especially since the clocks on different buses run at different frequencies, and that can make a difference to the timing of your peripheral, so you need to know which peripheral goes with which clock!</p><blockquote><p>It’s important to know which peripherals are on which buses, so that you can work out which peripheral clocks they use.</p></blockquote><p>Once we’ve enabled the peripheral clock for the ADC, we can <a href="https://github.com/ian-ross/stm32-timer-adc-dma/blob/main/common.c#L295-L296">configure the ADC conversion clock rate</a>. This is the <code>APB2</code> clock divided by some prescaler factor. One slight wrinkle is that this setting is <em>shared</em> among all three ADCs on the STM32F767. You set a single conversion clock prescaler that’s used for all three ADCs by setting a value in the <code>ADC123_COMMON-&gt;CCR</code> register. For our purposes, we’ll use the peripheral clock divided by two (the smallest prescaler that’s allowed).</p><h3>3. Disable ADC continuous mode</h3><p>The terminology here is confusing! “Continuous mode” means that as soon as the ADC completes a conversion, it immediately starts a new one, generating conversion results as quickly as it can. Sometimes you want this “firehose” kind of conversion, when you have a signal or set of signals that you want to sample as fast as you possibly can. In other applications, you have a specific sample rate in mind, and you use a timer to enforce that. (That’s what we’re going to do later on.) If you’re using a timer to trigger ADC conversions, you do <em>not</em> want continuous mode! You want the ADC to perform a single conversion at each trigger event, then to stop and wait for the next trigger event.</p><p>One additional source of confusion is that the ADC can convert more than one input for each trigger event. We’ll see how this works later, but you often have a situation where an external event (e.g. a timer) triggers a conversion and the ADC performs conversions on a set of inputs one after another before stopping and waiting for the next trigger event. Although this setup involves rapid conversion of multiple data items, it isn’t “continuous mode”! This mode is called "<strong>scan mode</strong>”. (To add to the confusion, there’s also a “discontinuous mode”, but let’s not talk about that...)</p><blockquote><p>“Continuous mode” and “scan mode” are different things!</p></blockquote><p>In any case, we need to <a href="https://github.com/ian-ross/stm32-timer-adc-dma/blob/main/common.c#L298-L299">disable continuous mode</a>, like this:</p><div class="highlight"><div class="source"><pre><span></span><span class="n">MODIFY_REG</span><span class="p">(</span><span class="n">ADC1</span><span class="o">-&gt;</span><span class="n">CR2</span><span class="p">,</span> <span class="n">ADC_CR2_CONT</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+</pre></div></div><h3>4. Set ADC trigger source</h3><p>For this example, we’re going to start ADC conversions explicitly, i.e. not using a trigger from another peripheral. The trigger source for ADC conversions is controlled by the <code>EXTEN</code> and <code>EXTSEL</code> fields in the ADC’s <code>CR2</code> configuration register:</p><p><a href="./sky blue trades _ STM32 Timer + ADC + DMA_ Part 1_files/rm-15-13-3.png" target="_blank"><img alt="STM32F767 reference manual Section 15.13.3" src="./sky blue trades _ STM32 Timer + ADC + DMA_ Part 1_files/rm-15-13-3.png"></a></p><p>To <a href="https://github.com/ian-ross/stm32-timer-adc-dma/blob/main/ex1.c#L57-L58">disable external triggering</a>, we zero out the <code>EXTEN</code> field:</p><pre>MODIFY_REG(ADC1-&gt;CR2, ADC_CR2_EXTEN, 0);</pre><p>Once this is done, the only way to start an ADC conversion is to set the <code>SWSTART</code> bit in <code>CR2</code>:</p><p><a href="./sky blue trades _ STM32 Timer + ADC + DMA_ Part 1_files/rm-adc-cr2-swstart.png" target="_blank"><img alt="STM32F767 reference manual Section 15.13.3: ADC CR2 SWSTART" src="./sky blue trades _ STM32 Timer + ADC + DMA_ Part 1_files/rm-adc-cr2-swstart.png"></a></p><h3>5. Select ADC channels</h3><p>For this example, we’ll convert a single analog input for each ADC conversion that we trigger. It is possible to do multiple conversions in a polling setup (or using interrupts without DMA), but I can’t recommend it. Using DMA is much more reliable for that, and we’ll see how in the next article.</p><p>You can make STM32F767’s ADCs convert two distinct sets of any channels you like in any order, which means that the registers to configure channel selection are a little complicated. We’re going to use “regular” conversions (the other kind are “injected”). The channel list is configured in the <code>ADC1-&gt;SQR1</code>, <code>ADC1-&gt;SQR2</code> and <code>ADC1-&gt;SQR3</code> sequence registers:</p><p><a href="./sky blue trades _ STM32 Timer + ADC + DMA_ Part 1_files/rm-adc-sqr.png" target="_blank"><img alt="STM32F767 reference manual Section 15.13.9-11: ADC SQRx" src="./sky blue trades _ STM32 Timer + ADC + DMA_ Part 1_files/rm-adc-sqr.png"></a></p><p>We need to set two things here: the <code>L</code> field in the <code>SQR1</code> register tells the ADC how many input channels to convert. The value in <code>L</code> is one less than the channel count, so we <a href="https://github.com/ian-ross/stm32-timer-adc-dma/blob/main/ex1.c#L60-L61">set <code>L</code> to zero</a>, since we’re converting only one channel.</p><div class="highlight"><div class="source"><pre><span></span><span class="n">MODIFY_REG</span><span class="p">(</span><span class="n">ADC1</span><span class="o">-&gt;</span><span class="n">SQR1</span><span class="p">,</span> <span class="n">ADC_SQR1_L</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+</pre></div></div><p>Then we need to tell the ADC which channels to convert. This is a little weird, because the channels are given in <em>reverse</em> order, running from the LSBs to MSBs of <code>SQR3</code>, then from the LSBs to the MSBs of <code>SQR2</code> and finally from the LSBs to part-way through <code>SQR1</code>. There are 16 possible slots, each of which needs 5 bits to record which input to convert (the input channels are numbered from 0 to 18, and the highest numbered channels correspond to some interal sensors in the MCU rather than the to external analog inputs).</p><blockquote><p>ADC channel ranks run backwards from the LSBs of register <code>SQR3</code>.</p></blockquote><p>We’re going to do a <a href="https://github.com/ian-ross/stm32-timer-adc-dma/blob/main/ex1.c#L63-L64">single conversion on channel 4</a>, so we need to set the least significant 5 bits of <code>SQR3</code> (the position for the first conversion):</p><div class="highlight"><div class="source"><pre><span></span><span class="n">MODIFY_REG</span><span class="p">(</span><span class="n">ADC1</span><span class="o">-&gt;</span><span class="n">SQR3</span><span class="p">,</span> <span class="mh">0x0000001FU</span><span class="p">,</span> <span class="mh">0x04</span><span class="p">);</span>
+</pre></div></div><h3>6. Set ADC sample time</h3><p>The last thing we need to do is to <a href="https://github.com/ian-ross/stm32-timer-adc-dma/blob/main/ex1.c#L66-L67">set the sample time used by the ADC for doing our conversions</a>. As for the channel selection, the sample times for the different channels are spread over multiple registers, in this case <code>SMPR1</code> and <code>SMPR2</code>:</p><p><a href="./sky blue trades _ STM32 Timer + ADC + DMA_ Part 1_files/rm-adc-smpr.png" target="_blank"><img alt="STM32F767 reference manual Section 15.13.4-5: ADC SMPRx" src="./sky blue trades _ STM32 Timer + ADC + DMA_ Part 1_files/rm-adc-smpr.png"></a></p><p>For channel 4, the relevant field that we need is in <code>ADC1-&gt;SMPR2</code>. We’ll choose 56 cycles of the ADC sample clock as our sample time. Because the ADC sample clock is <code>APB2CLK / 2</code> = 27 MHz, this gives a sample time of about 2 µs. In fact, the total time for the ADC conversion is 12 cycles more than the value we set as the sample time, so a sample takes 68 cycles, i.e. about 2.5 µs. We set this up by doing:</p><div class="highlight"><div class="source"><pre><span></span><span class="n">MODIFY_REG</span><span class="p">(</span><span class="n">ADC1</span><span class="o">-&gt;</span><span class="n">SMPR2</span><span class="p">,</span> <span class="n">ADC_SMPR2_SMP4</span><span class="p">,</span> <span class="mh">0x03</span> <span class="o">&lt;&lt;</span> <span class="n">ADC_SMPR2_SMP4_Pos</span><span class="p">);</span>
+</pre></div></div><p>Here, our choice of sample time is slightly arbitrary. In a real application, we’d base the sample time on the characteristics of the signal we were sampling. Our 2.5 µs sample time is fast enough for many applications (audio, for example). If you want to sample faster, the fastest APB2 clock allowed on the STM32F767 is 90 MHz, which gives a maximum ADC sample clock of 45 MHz. That means a minimum conversion time of 3+12 cycles = 333 ns. You can shave even more off the conversion time by using the “fast conversion” options, which reduce the ADC resolution from 12 bits down to lower values to get quicker conversions. The absolute fastest possible is for 6 bit conversions, which take 3 + 6 = 9 cycles, or 200 ns.</p><hr><p><em>To summarise: we’ve set ADC1 up to do a single conversion on input channel 4 (which is connected to pin PA4 on the STM32F767ZI) with a sample time of about 2.5 µs, with manual triggering only (i.e. conversions must be started by setting the <code>SWSTART</code> bit in the <code>ADC1-&gt;CR2</code> configuration register).</em></p><h2>Main program</h2><p>After the ADC setup, the <code>ex1.c</code> program goes into a <a href="https://github.com/ian-ross/stm32-timer-adc-dma/blob/main/ex1.c#L17-L50">simple <code>while (true) { ... }</code> loop</a>. This uses a SysTick event count to time events (an “I’m alive” blinky and an LED indicator that an ADC conversion has been triggered), and otherwise just waits for button press events to start an ADC conversion.</p><p>This “super-loop” structure doesn’t scale to much larger applications with many different events and multiple tasks that need to run at once (for that you’d use an RTOS), but it’s perfect for these small examples, because you can see more or less the whole application on one screen.</p><h3>Main loop</h3><p>Here’s the full main loop of the <code>ex1.c</code> example program:</p><div class="highlight"><div class="source"><pre><span></span><span class="kt">char</span> <span class="n">buff</span><span class="p">[</span><span class="mi">64</span><span class="p">];</span>
+<span class="kt">uint32_t</span> <span class="n">blink_start</span> <span class="o">=</span> <span class="n">systick_count</span><span class="p">;</span>
+<span class="kt">uint32_t</span> <span class="n">adc_blink_start</span><span class="p">;</span>
+<span class="kt">bool</span> <span class="n">adc_blink_on</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+<span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// "I'm alive" blinky.</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">systick_count</span> <span class="o">-</span> <span class="n">blink_start</span> <span class="o">&gt;=</span> <span class="mi">100</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">LED1_PORT</span><span class="o">-&gt;</span><span class="n">ODR</span> <span class="o">^=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">LED1_PIN</span><span class="p">;</span>
+    <span class="n">blink_start</span> <span class="o">=</span> <span class="n">systick_count</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="c1">// "ADC in progress" blinky.</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">adc_blink_on</span> <span class="o">&amp;&amp;</span> <span class="n">systick_count</span> <span class="o">-</span> <span class="n">adc_blink_start</span> <span class="o">&gt;</span> <span class="mi">250</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">CLEAR_BIT</span><span class="p">(</span><span class="n">LED2_PORT</span><span class="o">-&gt;</span><span class="n">ODR</span><span class="p">,</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">LED2_PIN</span><span class="p">);</span>
+    <span class="n">adc_blink_on</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="c1">// Handle button press: start "ADC in progress" blinky, do polled</span>
+  <span class="c1">// ADC and print result.</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">button_pressed</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">button_pressed</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+    <span class="n">usart_print</span><span class="p">(</span><span class="s">"BUTTON</span><span class="se">\r\n</span><span class="s">"</span><span class="p">);</span>
+    <span class="n">SET_BIT</span><span class="p">(</span><span class="n">LED2_PORT</span><span class="o">-&gt;</span><span class="n">ODR</span><span class="p">,</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">LED2_PIN</span><span class="p">);</span>
+    <span class="n">adc_blink_on</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+    <span class="n">adc_blink_start</span> <span class="o">=</span> <span class="n">systick_count</span><span class="p">;</span>
+
+    <span class="n">SET_BIT</span><span class="p">(</span><span class="n">ADC1</span><span class="o">-&gt;</span><span class="n">CR2</span><span class="p">,</span> <span class="n">ADC_CR2_ADON</span><span class="p">);</span>
+    <span class="kt">uint16_t</span> <span class="n">sample</span> <span class="o">=</span> <span class="n">polled_adc</span><span class="p">();</span>
+    <span class="n">CLEAR_BIT</span><span class="p">(</span><span class="n">ADC1</span><span class="o">-&gt;</span><span class="n">CR2</span><span class="p">,</span> <span class="n">ADC_CR2_ADON</span><span class="p">);</span>
+
+    <span class="n">sprintf</span><span class="p">(</span><span class="n">buff</span><span class="p">,</span> <span class="s">"ADC: %d</span><span class="se">\r\n</span><span class="s">"</span><span class="p">,</span> <span class="n">sample</span><span class="p">);</span>
+    <span class="n">usart_print</span><span class="p">(</span><span class="n">buff</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div></div><p>The <a href="https://github.com/ian-ross/stm32-timer-adc-dma/blob/main/ex1.c#L22-L26">first <code>if</code> statement</a> inside the main loop blinks an LED continuously (5 times per second) to give an indication that the application is still alive. The <code>systick_count</code> variable is updated regularly (at 1 kHz) by the SysTick interrupt handler set up in the common configuration code we looked at earlier.</p><p>When an ADC conversion is started, the <code>adc_blink_on</code> flag is set and another LED is switched on. The <a href="https://github.com/ian-ross/stm32-timer-adc-dma/blob/main/ex1.c#L28-L32">second <code>if</code> statement</a> deals with switching this LED off after 250 ms.</p><p>The most important part of the code is in the <a href="https://github.com/ian-ross/stm32-timer-adc-dma/blob/main/ex1.c#L34-L49">third <code>if</code> statement</a>, which responds to button press events. The <code>button_pressed</code> flag is set in the interrupt handler for the button press event, and we first clear this flag. After writing a message using the USART we set up earlier, switching on the ADC conversion LED and setting up the variables needed to switch the LED off later, the code calls the <code>polled_adc</code> function to perform an ADC conversion.</p><p>One thing to notice here is that we switch the ADC on before doing a conversion and switch it off again after doing a conversion—this is what setting and clearing the <code>ADON</code> bit in the <code>ADC1-&gt;CR2</code> register does. This isn’t mandatory, since you can just leave the ADC switched on all the time if you like, but it saves power if you can switch the ADC off when you’re not using it.</p><h3>Use polling ADC</h3><p>Here’s the <a href="https://github.com/ian-ross/stm32-timer-adc-dma/blob/main/ex1.c#L71-L80"><code>polled_adc</code> function</a>:</p><div class="highlight"><div class="source"><pre><span></span><span class="k">static</span> <span class="kt">uint16_t</span> <span class="n">polled_adc</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// Manually start ADC conversion.</span>
+  <span class="n">SET_BIT</span><span class="p">(</span><span class="n">ADC1</span><span class="o">-&gt;</span><span class="n">CR2</span><span class="p">,</span> <span class="n">ADC_CR2_SWSTART</span><span class="p">);</span>
+
+  <span class="c1">// Wait for conversion complete.</span>
+  <span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">READ_BIT</span><span class="p">(</span><span class="n">ADC1</span><span class="o">-&gt;</span><span class="n">SR</span><span class="p">,</span> <span class="n">ADC_SR_EOC</span><span class="p">))</span> <span class="p">{</span> <span class="kr">__asm</span><span class="p">(</span><span class="s">"nop"</span><span class="p">);</span> <span class="p">}</span>
+
+  <span class="c1">// Read converted data (clears EOC flag).</span>
+  <span class="k">return</span> <span class="p">(</span><span class="kt">uint16_t</span><span class="p">)(</span><span class="n">READ_BIT</span><span class="p">(</span><span class="n">ADC1</span><span class="o">-&gt;</span><span class="n">DR</span><span class="p">,</span> <span class="n">ADC_DR_DATA</span><span class="p">));</span>
+<span class="p">}</span>
+</pre></div></div><p>The ADC conversion is started by setting the <code>SWSTART</code> bit in the <code>ADC1-&gt;CR2</code> configuration register. If you remember from back when we were configuring the ADC, this manual software trigger is the only way to start an ADC conversion in our setup, since we’ve not enabled any other trigger sources.</p><p>Once we start the ADC conversion, we could go and do something else while the conversion is happening, but here we spin waiting for the <code>EOC</code> (<em>end of conversion</em>) flag to be set in the <code>ADC-&gt;SR</code> status register. This busy waiting is what’s meant by “polling” in this context. It’s not an efficient use of CPU resources, but it’s definitely simple!</p><p>Once the ADC signals that the conversion is complete by setting the <code>EOC</code> flag, we read the converted value from the <code>ADC1-&gt;DR</code> data register. The way we have things configured, the 12-bit converted value is right-aligned in the 16-bit data register. This data alignment can be set up differently if it’s convenient. (One small detail that will be important later: reading the data register resets the <code>EOC</code> flag.)</p><h2>Conclusions</h2><p>And that’s all there is to polled ADC conversion. It often happens that more than 90% of our effort goes into configuring the peripherals we’re going to use. Using the peripherals sometimes feels like an anticlimax!</p><p>You can see that pattern in this overly long article: almost all of the article is about setup and configuration. Once you understand the peripherals on the device you’re using, you can shortcut some of this configuration effort using the device configuration tools in the STM32Cube IDE, but I think that it’s useful to do some examples at this lower level first to get a good understanding of what the options are and how everything fits together. Working this way forces you to read the documentation, which (if you’re like me), you’d probably avoid otherwise.</p><p>Now that we’ve covered most of the ADC configuration we need, the <a href="https://skybluetrades.net/blog/2020/11/2020-11-25-stm32-timer-adc-dma-2">next article</a> will look at how you use DMA for analog-to-digital conversion.</p>
+
+
+    </section>
+    <hr>
+    <footer>
+      <div>Copyright 2011-2021 Ian Ross</div>
+      <div>This work is licensed under <a href="http://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer">CC BY-SA 4.0<img src="./sky blue trades _ STM32 Timer + ADC + DMA_ Part 1_files/cc.svg"><img src="./sky blue trades _ STM32 Timer + ADC + DMA_ Part 1_files/by.svg"><img src="./sky blue trades _ STM32 Timer + ADC + DMA_ Part 1_files/sa.svg"></a></div>
+    </footer>
+  </article>
+  <script>
+    window.MathJax = { tex: { inlineMath: [['$','$']] } };
+  </script>
+  <script id="MathJax-script" async="" src="./sky blue trades _ STM32 Timer + ADC + DMA_ Part 1_files/tex-mml-chtml.js"></script>
+
+
+
+
+
+</body></html>
